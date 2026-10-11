@@ -1,0 +1,10 @@
+singleton Theme Theme.qml
+singleton Time Time.qml
+Zone Zone.qml
+Card Card.qml
+Txt Txt.qml
+Pill Pill.qml
+Toggle Toggle.qml
+Bar Bar.qml
+IconButton IconButton.qml
+RoundImage RoundImage.qml
