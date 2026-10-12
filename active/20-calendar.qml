@@ -1,7 +1,7 @@
 import QtQuick
 import Quickshell
 import Quickshell.Io
-import "../core"
+import qs.core
 
 // week strip + agenda. Days with events get a dot, click a day to see its events.
 // Events come from scripts/gcal.py, which reads ~/.config/desk-widgets/calendars.txt

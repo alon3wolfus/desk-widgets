@@ -1,5 +1,5 @@
 import Quickshell
-import "core"
+import qs.core
 
 // Desktop widgets. Put .qml files in ./active to show them, ./inactive to hide them.
 // Files directly in ./active go to defaultZone. Put a file in a subfolder named after a
@@ -12,6 +12,12 @@ ShellRoot {
     readonly property int cardWidth: 320
     readonly property int gap: 10
     readonly property int margin: 24
+
+    // extra room for bars or docks on each edge, in px (added on top of margin)
+    readonly property int insetTop: 0
+    readonly property int insetBottom: 0
+    readonly property int insetLeft: 58
+    readonly property int insetRight: 0
 
     readonly property var zones: [
         "top-left", "top-center", "top-right",
@@ -29,6 +35,10 @@ ShellRoot {
             cardWidth: root.cardWidth
             gap: root.gap
             margin: root.margin
+            insetTop: root.insetTop
+            insetBottom: root.insetBottom
+            insetLeft: root.insetLeft
+            insetRight: root.insetRight
             folder: Qt.resolvedUrl("active/" + modelData)
             rootFolder: Qt.resolvedUrl("active")
         }

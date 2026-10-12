@@ -1,6 +1,6 @@
 import QtQuick
 import Quickshell.Services.Mpris
-import "../core"
+import qs.core
 
 // whatever is playing over MPRIS (spotify, firefox, mpv, apple music clients...)
 Card {

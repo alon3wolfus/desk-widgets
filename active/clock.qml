@@ -1,6 +1,6 @@
 import QtQuick
 import Quickshell
-import "../core"
+import qs.core
 
 Card {
     id: root

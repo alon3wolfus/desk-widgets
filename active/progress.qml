@@ -1,5 +1,5 @@
 import QtQuick
-import "../core"
+import qs.core
 
 // how far through the day, week, month and year you are
 Card {

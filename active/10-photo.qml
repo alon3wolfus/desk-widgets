@@ -1,7 +1,7 @@
 import Quickshell
 import Quickshell.Io
 import QtQuick
-import "../core"
+import qs.core
 
 // photo frame: cycles through the pictures in `folder`, click to skip
 Card {

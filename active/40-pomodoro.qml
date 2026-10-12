@@ -1,6 +1,6 @@
 import QtQuick
 import Quickshell
-import "../core"
+import qs.core
 
 // work / break timer, sends a notification when a session ends
 Card {

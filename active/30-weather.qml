@@ -1,6 +1,6 @@
 import QtQuick
 import Quickshell.Io
-import "../core"
+import qs.core
 
 // weather from wttr.in, no API key. The sun rides an arc from 6:00 to 18:00.
 // city: "Vellore", "Chennai", "51.5,-0.12", "LHR". Leave empty to guess from your IP.

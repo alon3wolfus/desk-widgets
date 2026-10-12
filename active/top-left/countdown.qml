@@ -1,5 +1,5 @@
 import QtQuick
-import "../core"
+import qs.core
 
 // days left until your dates. Edit `events`, dates are yyyy-MM-dd.
 Card {

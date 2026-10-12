@@ -1,6 +1,6 @@
 import QtQuick
 import Quickshell.Io
-import "../core"
+import qs.core
 
 // audio visualiser fed by cava (https://github.com/karlstav/cava), reads whatever is playing
 Card {

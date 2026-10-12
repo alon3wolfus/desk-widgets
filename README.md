@@ -57,21 +57,67 @@ Each widget keeps its settings as plain properties at the top of its file (city 
 
 ## Placing widgets
 
-By default everything in `active/` stacks in the top right. To put a widget somewhere else, put it in a subfolder of `active/` named after the spot. Make the folder if it isn't there.
+By default everything in `active/` stacks in the top right. To put a widget somewhere else, move it into a subfolder of `active/` named after the spot you want. Make the folder if it isn't there. Changes show up live.
+
+```
+top-left      top-center      top-right
+center-left   center          center-right
+bottom-left   bottom-center   bottom-right
+```
+
+Examples, run from the repo folder:
+
+```sh
+# clock in the top left
+mkdir -p active/top-left && mv inactive/clock.qml active/top-left/
+
+# audio visualiser along the bottom
+mkdir -p active/bottom-center && mv inactive/audio-vis.qml active/bottom-center/
+
+# several info widgets down the left side
+mkdir -p active/center-left
+mv inactive/system-stats.qml inactive/battery.qml inactive/todo.qml active/center-left/
+
+# move a widget to another zone
+mv active/top-left/clock.qml active/bottom-right/
+
+# back to the default zone (top right)
+mv active/top-left/clock.qml active/
+
+# turn it off
+mv active/top-left/clock.qml inactive/
+```
+
+A layout can end up looking like this:
 
 ```
 active/
-  10-photo.qml              top-right, the default
-  top-left/clock.qml
-  bottom-center/audio-vis.qml
-  center-left/todo.qml
+  10-photo.qml                top-right (default)
+  20-calendar.qml             top-right
+  top-left/
+    10-clock.qml
+    20-now-playing.qml
+  bottom-left/
+    10-progress.qml
+  bottom-center/
+    audio-vis.qml
 ```
 
-Zones: `top-left` `top-center` `top-right` `center-left` `center` `center-right` `bottom-left` `bottom-center` `bottom-right`.
+Widgets in one zone stack top to bottom in file name order, so prefix names with numbers to reorder them. When a stack reaches the bottom of the screen it wraps into a new column beside it. Folder names must match the zone names exactly (lowercase, hyphenated) or the widgets in them won't show.
 
-Widgets in one zone stack top to bottom. When a stack reaches the bottom of the screen it wraps into a new column beside it. If your bar covers part of the screen, raise `margin` in `shell.qml`.
+### Settings
 
-`defaultZone`, `cardWidth`, `gap` and `margin` are at the top of `shell.qml`.
+At the top of `shell.qml`:
+
+| Setting | What it does |
+|---|---|
+| `defaultZone` | Where files directly in `active/` go |
+| `cardWidth` | Width of every widget in px |
+| `gap` | Space between widgets |
+| `margin` | Space from the screen edge |
+| `insetTop` `insetBottom` `insetLeft` `insetRight` | Extra room for a bar or dock on that edge. Set it to the bar's size in px so widgets stay clear of it |
+
+For example, with a 58px bar on the left, `insetLeft: 58` keeps the left zones off it.
 
 ## Setup notes
 
@@ -87,7 +133,7 @@ Add a file to `active/` and import the shared bits:
 
 ```qml
 import QtQuick
-import "../core"
+import qs.core
 
 Card {
     height: 80
@@ -95,7 +141,7 @@ Card {
 }
 ```
 
-`core/` has `Card`, `Txt`, `Pill`, `Toggle`, `Bar`, `IconButton`, `RoundImage`, plus the `Theme` and `Time` singletons. Colours come from `Theme`, so a new widget matches the rest.
+`core/` has `Card`, `Txt`, `Pill`, `Toggle`, `Bar`, `IconButton`, `RoundImage`, plus the `Theme` and `Time` singletons. Because it imports `qs.core`, the file works from any zone folder. Colours come from `Theme`, so a new widget matches the rest.
 
 ## Layout of the repo
 

@@ -1,7 +1,7 @@
 import QtQuick
 import Quickshell
 import Quickshell.Io
-import "../core"
+import qs.core
 
 // tiny to-do list, saved to ~/.local/share/desk-widgets/todo.json
 // click an item to tick it, hover for the × to delete it
