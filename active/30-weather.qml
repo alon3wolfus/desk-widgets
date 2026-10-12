@@ -2,7 +2,7 @@ import QtQuick
 import Quickshell.Io
 import qs.core
 
-// weather from wttr.in, no API key. The sun rides an arc from 6:00 to 18:00.
+// weather from wttr.in, no API key. A sun or moon rides an arc across the full day, 00:00 to 24:00.
 // city: "Vellore", "Chennai", "51.5,-0.12", "LHR". Leave empty to guess from your IP.
 Card {
     id: root
@@ -16,9 +16,16 @@ Card {
     property string desc: "Loading"
     property var forecast: []
 
-    readonly property real dayFrac: {
-        const n = Time.now;
-        return Math.max(0, Math.min(1, (n.getHours() + n.getMinutes() / 60 - 6) / 12));
+    property real sunrise: 6
+    property real sunset: 18
+
+    readonly property real hour: Time.now.getHours() + Time.now.getMinutes() / 60
+    readonly property bool isDay: hour >= sunrise && hour < sunset
+
+    function toHours(t) {
+        const m = /(\d+):(\d+)\s*(AM|PM)/i.exec(t);
+        if (!m) return -1;
+        return (parseInt(m[1]) % 12) + (m[3].toUpperCase() === "PM" ? 12 : 0) + parseInt(m[2]) / 60;
     }
 
     function icon(c) {
@@ -37,6 +44,9 @@ Card {
             temp = c["temp_" + u] + "°" + u;
             desc = c.weatherDesc[0].value;
             if (city === "") place = j.nearest_area[0].areaName[0].value;
+            const astro = j.weather[0].astronomy[0];
+            const rise = toHours(astro.sunrise), set = toHours(astro.sunset);
+            if (rise >= 0 && set > rise) { sunrise = rise; sunset = set; }
             forecast = j.weather.map(d => {
                 const p = d.date.split("-");
                 return {
@@ -76,38 +86,73 @@ Card {
                 ctx.clearRect(0, 0, width, height);
                 const cx = width / 2, cy = height - 6;
                 const rx = width / 2 - 18, ry = height - 44;
+                const at = h => {
+                    const a = Math.PI * h / 24;
+                    return [cx - rx * Math.cos(a), cy - ry * Math.sin(a)];
+                };
+                const trace = (h0, h1) => {
+                    ctx.beginPath();
+                    for (let i = 0; i <= 80; i++) {
+                        const p = at(h0 + (h1 - h0) * i / 80);
+                        if (i === 0) ctx.moveTo(p[0], p[1]); else ctx.lineTo(p[0], p[1]);
+                    }
+                    ctx.stroke();
+                };
 
+                ctx.lineCap = "round";
                 ctx.lineWidth = 2;
-                ctx.strokeStyle = Qt.alpha(Theme.dim, 0.35);
-                ctx.beginPath();
-                ctx.ellipse(cx - rx, cy - ry, rx * 2, ry * 2);
-                ctx.stroke();
+                ctx.strokeStyle = Qt.alpha(Theme.dim, 0.3);
+                trace(0, 24);
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = Qt.alpha(Theme.pink, 0.55);
+                trace(root.sunrise, root.sunset);
 
-                const a = Math.PI * root.dayFrac;
-                const sx = cx - rx * Math.cos(a), sy = cy - ry * Math.sin(a);
-
-                const g = ctx.createRadialGradient(sx, sy, 0, sx, sy, 22);
-                g.addColorStop(0, Qt.alpha(Theme.pink, 0.55));
-                g.addColorStop(1, Qt.alpha(Theme.pink, 0));
+                const p = at(root.hour), sx = p[0], sy = p[1];
+                const glow = root.isDay ? Theme.pink : Theme.purple;
+                const g = ctx.createRadialGradient(sx, sy, 0, sx, sy, 24);
+                g.addColorStop(0, Qt.alpha(glow, 0.55));
+                g.addColorStop(1, Qt.alpha(glow, 0));
                 ctx.fillStyle = g;
                 ctx.beginPath();
-                ctx.arc(sx, sy, 22, 0, Math.PI * 2);
+                ctx.arc(sx, sy, 24, 0, Math.PI * 2);
                 ctx.fill();
 
-                ctx.fillStyle = Theme.white;
-                ctx.beginPath();
-                ctx.arc(sx, sy, 7, 0, Math.PI * 2);
-                ctx.fill();
+                if (root.isDay) {
+                    ctx.strokeStyle = Theme.pink;
+                    ctx.lineWidth = 1.8;
+                    for (let i = 0; i < 8; i++) {
+                        const a = i * Math.PI / 4;
+                        ctx.beginPath();
+                        ctx.moveTo(sx + Math.cos(a) * 10, sy + Math.sin(a) * 10);
+                        ctx.lineTo(sx + Math.cos(a) * 14, sy + Math.sin(a) * 14);
+                        ctx.stroke();
+                    }
+                    ctx.fillStyle = Theme.white;
+                    ctx.beginPath();
+                    ctx.arc(sx, sy, 7, 0, Math.PI * 2);
+                    ctx.fill();
+                } else {
+                    // crescent opening to the right
+                    const R = 9, t = Math.PI * 50 / 180;
+                    ctx.fillStyle = Theme.white;
+                    ctx.beginPath();
+                    ctx.arc(sx, sy, R, -t, t, true);
+                    ctx.quadraticCurveTo(sx - R * 1.44, sy, sx + R * Math.cos(t), sy - R * Math.sin(t));
+                    ctx.closePath();
+                    ctx.fill();
+                }
             }
             Connections {
                 target: root
-                function onDayFracChanged() { arc.requestPaint(); }
+                function onHourChanged() { arc.requestPaint(); }
+                function onSunriseChanged() { arc.requestPaint(); }
+                function onSunsetChanged() { arc.requestPaint(); }
             }
         }
 
         Txt { x: 10; y: 4; text: root.temp; font.pixelSize: 30; font.weight: Font.Medium }
         Txt { anchors.right: parent.right; anchors.rightMargin: 10; y: 10; text: root.desc; color: Theme.pink; font.pixelSize: 13 }
-        Txt { anchors.left: parent.left; anchors.leftMargin: 10; anchors.bottom: parent.bottom; text: root.place; color: Theme.dim; font.pixelSize: 11 }
+        Txt { anchors.horizontalCenter: parent.horizontalCenter; anchors.bottom: parent.bottom; text: root.place; color: Theme.dim; font.pixelSize: 11 }
     }
 
     Row {
