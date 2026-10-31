@@ -256,7 +256,7 @@ Card {
         }
     }
 
-    // ---- date picker, in place of the day ----
+    // ---- date picker, in place of the day: month and buttons on the left, the days on the right ----
     Item {
         id: picker
         width: parent.width
@@ -264,63 +264,70 @@ Card {
         visible: root.picking
 
         Item {
-            id: pickerHead
-            width: parent.width
-            height: 22
+            id: pickerSide
+            width: 92
+            height: parent.height
 
-            Txt {
-                anchors.verticalCenter: parent.verticalCenter
-                text: Qt.formatDate(root.pickerMonth, "MMMM yyyy")
-                font.pixelSize: 13
-                font.weight: Font.Bold
+            Column {
+                spacing: 0
+                Txt {
+                    text: Qt.formatDate(root.pickerMonth, "MMMM")
+                    font.pixelSize: 15
+                    font.weight: Font.Bold
+                }
+                Txt {
+                    text: Qt.formatDate(root.pickerMonth, "yyyy")
+                    color: Theme.textDim
+                    font.pixelSize: 13
+                }
             }
             Row {
-                anchors { right: parent.right; verticalCenter: parent.verticalCenter }
-                spacing: 2
-                Txt {
-                    anchors.verticalCenter: parent.verticalCenter
-                    rightPadding: 6
-                    text: "Today"
-                    color: Theme.red
-                    font.pixelSize: 11
-                    font.weight: Font.DemiBold
-                    MouseArea { anchors.fill: parent; anchors.margins: -4; cursorShape: Qt.PointingHandCursor; onClicked: root.pick(root.todayKey) }
-                }
+                anchors { bottom: todayBtn.top; bottomMargin: 8; left: parent.left; leftMargin: -4 }
+                spacing: 4
                 IconButton {
-                    anchors.verticalCenter: parent.verticalCenter
-                    icon: "chevron_left"; size: 22; fill: "transparent"
+                    icon: "chevron_left"; size: 28
                     onClicked: { root.pickerMonth = new Date(root.pickerMonth.getFullYear(), root.pickerMonth.getMonth() - 1, 1); revert.restart(); }
                 }
                 IconButton {
-                    anchors.verticalCenter: parent.verticalCenter
-                    icon: "chevron_right"; size: 22; fill: "transparent"
+                    icon: "chevron_right"; size: 28
                     onClicked: { root.pickerMonth = new Date(root.pickerMonth.getFullYear(), root.pickerMonth.getMonth() + 1, 1); revert.restart(); }
                 }
-                IconButton {
-                    anchors.verticalCenter: parent.verticalCenter
-                    icon: "close"; size: 22; fill: "transparent"; ink: Theme.textDim
-                    onClicked: root.picking = false
+            }
+            Row {
+                id: todayBtn
+                anchors.bottom: parent.bottom
+                spacing: 14
+                Txt {
+                    text: "Today"
+                    color: Theme.red
+                    font.weight: Font.DemiBold
+                    MouseArea { anchors.fill: parent; anchors.margins: -6; cursorShape: Qt.PointingHandCursor; onClicked: root.pick(root.todayKey) }
+                }
+                Txt {
+                    text: "Close"
+                    color: Theme.textDim
+                    MouseArea { anchors.fill: parent; anchors.margins: -6; cursorShape: Qt.PointingHandCursor; onClicked: root.picking = false }
                 }
             }
         }
 
         Grid {
             id: pgrid
-            anchors { top: pickerHead.bottom; topMargin: 2; left: parent.left; right: parent.right; bottom: parent.bottom }
+            anchors { top: parent.top; left: pickerSide.right; leftMargin: 8; right: parent.right; bottom: parent.bottom }
             columns: 7
             readonly property var days: root.monthDays(root.pickerMonth)
             readonly property real cellW: width / 7
-            readonly property real cellH: (height - 12) / (days.length / 7)
+            readonly property real cellH: (height - 16) / (days.length / 7)
 
             Repeater {
                 model: ["M", "T", "W", "T", "F", "S", "S"]
                 Txt {
                     required property string modelData
-                    width: pgrid.cellW; height: 12
+                    width: pgrid.cellW; height: 16
                     horizontalAlignment: Text.AlignHCenter
                     text: modelData
                     color: Theme.textFaint
-                    font.pixelSize: 9
+                    font.pixelSize: 10
                     font.weight: Font.DemiBold
                 }
             }
@@ -337,21 +344,23 @@ Card {
 
                     Rectangle {
                         anchors.centerIn: parent
-                        width: Math.min(parent.width, parent.height); height: width; radius: width / 2
+                        width: Math.min(parent.width, parent.height) - 1; height: width; radius: width / 2
                         color: pcell.today ? Theme.red : pcell.chosen ? Theme.raisedHot : cellMouse.containsMouse ? Theme.raised : "transparent"
                     }
                     Txt {
                         anchors.centerIn: parent
                         text: pcell.modelData.getDate()
                         color: pcell.today ? "white" : pcell.inMonth ? Theme.text : Theme.textFaint
-                        font.pixelSize: 10
+                        opacity: pcell.inMonth || pcell.today ? 1 : 0.6
+                        font.pixelSize: 11
                         font.weight: pcell.today || pcell.chosen ? Font.Bold : Font.Medium
                     }
+                    // a dot to the right of days with events, so it doesn't crowd the row below
                     Rectangle {
                         visible: (root.eventsByDate[pcell.k] || []).length > 0 && !pcell.today
-                        anchors { horizontalCenter: parent.horizontalCenter; bottom: parent.bottom; bottomMargin: 0 }
+                        anchors { verticalCenter: parent.verticalCenter; left: parent.horizontalCenter; leftMargin: 11 }
                         width: 3; height: 3; radius: 1.5
-                        color: Theme.textDim
+                        color: Theme.red
                     }
                     MouseArea {
                         id: cellMouse

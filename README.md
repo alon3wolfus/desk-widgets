@@ -12,7 +12,7 @@ macOS-style desktop widgets for Hyprland and other Wayland compositors, built wi
 
 Frosted-glass widgets that sit on your wallpaper, below every window, like the widgets on a Mac desktop. They come in small, medium and large sizes on a grid, follow your light / dark preference, and can be dragged around in an edit mode. Ten themes, from the default macOS glass to Catppuccin, Gruvbox, Nord, Tokyo Night and Rosé Pine.
 
-- **13 widgets**: clock, calendar, weather, music, system stats, network, battery, to-do, countdown, pomodoro, photo frame, now playing and day / year progress
+- **14 widgets**: clock, calendar, weather, music, system stats, network, battery, to-do, Obsidian notes, countdown, pomodoro, photo frame, now playing and day / year progress
 - **Real blur on Hyprland**, set up automatically with nothing written to your Hyprland config
 - **Edit mode** to drag widgets, add and remove them, and switch between zone and grid placement
 - **Plain QML files**: a widget is one `.qml` file, and turning it on or off is moving that file between two folders
@@ -33,6 +33,7 @@ Frosted-glass widgets that sit on your wallpaper, below every window, like the w
 | Network | `net-speed.qml` | Download and upload speed with live sparklines | |
 | Battery | `battery.qml` | Charge ring, charging state and time left | `upower` |
 | To-do | `todo.qml` | A Reminders-style list: click a circle to tick, × to delete, type to add | |
+| Notes | `notes.qml` | Your Obsidian vault like the macOS Notes widget: the notes you edited last with a date and preview, or one pinned note. Click to open in Obsidian, the pencil starts a new note. Read only | `python`, Obsidian |
 | Countdown | `countdown.qml` | Days left until an event you type in | |
 | Pomodoro | `40-pomodoro.qml` | Focus timer with short and long breaks, rounds, a daily goal, skip and reset. Click the ring to start, scroll it to add or take off minutes. Survives suspend and restarts | `libnotify`, `pipewire` for the sound |
 | Photo frame | `10-photo.qml` | Cycles through the pictures in `~/Pictures/desk-widgets`, click to skip | `shuf` |
@@ -182,6 +183,14 @@ Each widget keeps its options as properties at the top of its file. Edit them an
 | | `sound` | freedesktop `complete.oga` | Sound played when a timer ends, any file `pw-play` or `paplay` can play; `""` for silent |
 | | `scrollStep` | `1` | Minutes added or taken off per scroll notch |
 | | `use24h` | `false` | 24-hour "Ends at" time |
+| Notes | `vault` | `""` | Vault folder; empty uses the vault Obsidian has open |
+| | `note` | `""` | Pin one note, relative to the vault (`"Ideas/Todo.md"`); empty lists recent notes |
+| | `folder` | `""` | Only notes in this folder of the vault |
+| | `exclude` | `[]` | Folders to leave out, e.g. `["Templates", "Archive"]` |
+| | `newNoteFolder` | `""` | Where the pencil creates notes; empty lets Obsidian decide |
+| | `refreshSeconds` | `30` | How often the vault is read |
+| | `size` | `"medium"` | `"small"` shows one note, `"large"` a longer list |
+| | `use24h` | `false` | 24-hour times on today's notes |
 | Photo frame | `folder` | `~/Pictures/desk-widgets` | Where the pictures are |
 | | `intervalMinutes` | `5` | Minutes per picture |
 | Network | `samples` | `40` | Seconds of history in the sparklines |
@@ -217,6 +226,8 @@ property bool use24h: false
 **Calendar.** Put your iCal links in `~/.config/desk-widgets/calendars.txt`, one per line. For Google Calendar use *Settings → your calendar → Secret address in iCal format*. Treat the link like a password: it is read only from that file and never printed, logged or stored in this repo. Events sync every 15 minutes, from 31 days back to 120 days ahead.
 
 **To-do.** Items are saved to `~/.local/share/desk-widgets/todo.json`. Click the add row and type; Enter or + adds it.
+
+**Notes.** Finds the vault Obsidian has open on its own (from `~/.config/obsidian/obsidian.json`, Flatpak too); set `vault` for another one. It reads the Markdown files directly, so it works with any sync (Obsidian Sync, LiveSync, Git, Syncthing) and never writes to the vault. Titles come from the first `# heading` or the file name; previews skip frontmatter, embeds and comments, and show wikilinks as plain text. Clicks open `obsidian://` links, so Obsidian must be installed.
 
 **Countdown.** Type an event name, Enter, then the date as `ddmmyyyy`, Enter. It clears itself once the day has passed.
 
@@ -261,7 +272,7 @@ core/           theme, settings, layout, the desktop surface and shared componen
 themes/         colour palettes, one JSON file per theme
 active/         widgets that are shown, in zone folders
 inactive/       widgets that are available
-scripts/        helpers the widgets call (gcal.py, stats.sh, net.sh)
+scripts/        helpers the widgets call (gcal.py, stats.sh, net.sh, notes.py)
 docs/           images used in this readme
 ```
 
@@ -287,6 +298,7 @@ Each widget is a `.qml` file whose root is a `Card`. The desktop lists `active/`
 | `themes/<name>.json` | Theme palettes |
 | `scripts/gcal.py` | Fetches iCal feeds, prints JSON events |
 | `scripts/stats.sh` | CPU counters, memory, per-disk I/O time, uptime, temperature |
+| `scripts/notes.py` | Reads an Obsidian vault, prints recent notes or one note as JSON |
 | `scripts/net.sh` | Total bytes received and sent |
 | `~/.config/desk-widgets/settings.json` | `theme`, `mode`, `opacity`, `font`, `blur` |
 | `~/.config/desk-widgets/layout.json` | `mode` (`zones` or `grid`) and grid `positions` by file name |
