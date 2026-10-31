@@ -10,6 +10,7 @@
     "edge": "#414868",
     "edgeOpacity": 0.5,
     "sheen": 0.0,
+    "frost": 0.0,
     "text": "#c0caf5",
     "textDim": "#a9b1d6",
     "textFaint": "#565f89",

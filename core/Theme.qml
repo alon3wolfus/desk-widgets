@@ -19,7 +19,7 @@ Singleton {
         dark: true,
         surface: "#303446", surfaceOpacity: 0.85,
         raised: "#51576d", raisedOpacity: 0.4, raisedHotOpacity: 0.6,
-        edge: "#737994", edgeOpacity: 0.35, sheen: 0,
+        edge: "#737994", edgeOpacity: 0.35, sheen: 0, frost: 0,
         text: "#c6d0f5", textDim: "#a5adce", textFaint: "#838ba7",
         accent: "#ca9ee6", accent2: "#f4b8e4", onAccent: "#232634",
         red: "#e78284", orange: "#ef9f76", yellow: "#e5c890", green: "#a6d189",
@@ -60,6 +60,8 @@ Singleton {
     readonly property color raised:    Qt.alpha(p.raised, p.raisedOpacity)
     readonly property color raisedHot: Qt.alpha(p.raisedHot || p.raised, p.raisedHotOpacity)
     readonly property color edge:      Qt.alpha(p.edge, p.edgeOpacity)
+    // white haze over the card tint, what makes glass look frosted rather than smoked
+    readonly property color frost:     Qt.alpha("white", p.frost)
     // strength of the white sheen across the top of each card, 0 for none
     readonly property real sheen: p.sheen
 

@@ -1,9 +1,10 @@
 import QtQuick
 
-// Material Symbols Rounded glyph by name, e.g. "partly_cloudy_day". filled: solid instead of outline
+// Material Symbols Rounded glyph by name, e.g. "partly_cloudy_day". Outline by default: Qt draws the
+// filled style wrong for glyphs with cutouts (laptop, memory), so only fill simple shapes
 Text {
     property string name: ""
-    property bool filled: true
+    property bool filled: false
     property int size: 18
 
     text: name

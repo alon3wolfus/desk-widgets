@@ -9,7 +9,7 @@ Singleton {
     id: root
 
     readonly property string file: (Quickshell.env("XDG_CONFIG_HOME") || Quickshell.env("HOME") + "/.config") + "/desk-widgets/settings.json"
-    readonly property var defaults: ({ theme: "glass", mode: "auto", opacity: 1, font: "" })
+    readonly property var defaults: ({ theme: "glass", mode: "auto", opacity: 1, font: "", blur: true })
     property var values: defaults
 
     readonly property string theme: values.theme || defaults.theme
@@ -19,6 +19,8 @@ Singleton {
     readonly property real opacity: typeof values.opacity === "number" ? values.opacity : 1
     // overrides the theme's font, e.g. "Inter"
     readonly property string font: values.font || ""
+    // ask Hyprland to blur behind the cards (see Blur.qml)
+    readonly property bool blur: values.blur !== false
 
     FileView {
         path: root.file

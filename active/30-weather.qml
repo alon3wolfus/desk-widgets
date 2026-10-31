@@ -40,6 +40,7 @@ Card {
         return ["#506b88", "#8399b0"];
     }
 
+    tinted: sky
     color: sky ? "transparent" : Theme.surface
     gradient: sky ? skyGradient : null
     Gradient {

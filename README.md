@@ -126,7 +126,8 @@ Settings live in `~/.config/desk-widgets/settings.json`, written with the defaul
   "theme": "glass",
   "mode": "auto",
   "opacity": 1,
-  "font": ""
+  "font": "",
+  "blur": true
 }
 ```
 
@@ -136,16 +137,13 @@ Settings live in `~/.config/desk-widgets/settings.json`, written with the defaul
 | `mode` | `auto` follows your desktop's light / dark preference (`gsettings` color-scheme), or force `light` / `dark`. Themes with only one palette ignore it |
 | `opacity` | Multiplies card opacity. Raise it (e.g. `2`) if your compositor doesn't blur behind the widgets |
 | `font` | Overrides the theme's font |
+| `blur` | On Hyprland, blur behind the cards (see below) |
 
 `caelestia` follows the colours [caelestia](https://github.com/caelestia-dots/shell) generates from your wallpaper. To make your own theme, copy a file in `themes/` and change the colours.
 
-**Blur.** The glass look needs the compositor to blur behind the cards. Widgets use the layer namespace `desk-widgets`. On Hyprland (Lua config) add a layer rule:
+**Blur.** The glass look needs the compositor to blur behind the cards. On Hyprland desk-widgets does this itself: at start it adds a layer rule for its namespace (`desk-widgets`) with `hyprctl eval`, and adds it again whenever Hyprland reloads its config. Nothing is written to your Hyprland config, and the rule goes away with the next config reload once desk-widgets stops. Set `"blur": false` in `settings.json` to turn it off.
 
-```lua
-hl.layer_rule({ match = { namespace = "desk-widgets" }, blur = true, ignore_alpha = 0.05 })
-```
-
-`ignore_alpha` keeps the blur to the cards, not the empty space around them. With a hyprlang config, use the matching `blur` and `ignorealpha` layer rules.
+On other compositors, add a blur rule for the layer namespace `desk-widgets` yourself, or raise `opacity` so the cards stay readable without it.
 
 ## Setup notes
 

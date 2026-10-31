@@ -8,6 +8,8 @@ Rectangle {
     default property alias content: body.data
     property string size: "medium"
     property int pad: 16
+    // set when the widget paints its own background (weather sky), skips the frost
+    property bool tinted: false
 
     width: size === "small" ? Theme.unit : Theme.wide
     height: size === "large" ? Theme.wide : Theme.unit
@@ -16,6 +18,14 @@ Rectangle {
     border.width: 1
     border.color: Theme.edge
     Behavior on color { ColorAnimation { duration: 250 } }
+
+    // frost over the tint. Cards with their own gradient (weather) skip it
+    Rectangle {
+        anchors.fill: parent
+        radius: root.radius
+        visible: Theme.frost.a > 0 && !root.tinted
+        color: Theme.frost
+    }
 
     // light catching the top of the glass
     Rectangle {

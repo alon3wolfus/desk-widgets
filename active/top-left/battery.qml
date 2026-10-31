@@ -34,7 +34,7 @@ Card {
         value: root.level
         tint: root.level <= 0.2 && !root.plugged ? Theme.red : Theme.green
 
-        Icon { anchors.centerIn: parent; name: "laptop_mac"; size: 32 }
+        Icon { anchors.centerIn: parent; name: "laptop"; size: 34 }
     }
 
     Row {

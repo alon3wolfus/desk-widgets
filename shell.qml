@@ -23,6 +23,8 @@ ShellRoot {
         "bottom-left", "bottom-center", "bottom-right"
     ]
 
+    Blur {}
+
     Variants {
         model: root.zones
 
