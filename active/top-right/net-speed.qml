@@ -50,9 +50,10 @@ Card {
         anchors.fill: parent
 
         Repeater {
+            // fixed entries; the samples are read from root so updates don't rebuild the rows
             model: [
-                { name: "Download", sub: "Received", list: root.down, tint: Theme.green },
-                { name: "Upload",   sub: "Sent",     list: root.up,   tint: Theme.blue }
+                { key: "down", name: "Download", sub: "Received" },
+                { key: "up",   name: "Upload",   sub: "Sent" }
             ]
 
             Item {
@@ -61,7 +62,9 @@ Card {
                 required property int index
                 width: parent.width
                 height: parent.height / 2
-                readonly property real latest: modelData.list.length ? modelData.list[modelData.list.length - 1] : 0
+                readonly property var list: root[modelData.key]
+                readonly property color tint: modelData.key === "down" ? Theme.green : Theme.blue
+                readonly property real latest: list.length ? list[list.length - 1] : 0
                 readonly property var shown: root.split(latest)
 
                 Rectangle { visible: row.index > 0; width: parent.width; height: 1; color: Theme.raised }
@@ -79,7 +82,7 @@ Card {
                     width: parent.width - 92 - 92
                     height: parent.height - 24
                     anchors.verticalCenter: parent.verticalCenter
-                    property var list: row.modelData.list
+                    property var list: row.list
                     onListChanged: requestPaint()
                     onPaint: {
                         const ctx = getContext("2d");
@@ -90,8 +93,8 @@ Card {
                         const step = width / (root.samples - 1), x0 = width - (l.length - 1) * step;
                         const yOf = v => height - 1 - (v / peak) * (height - 2);
                         const g = ctx.createLinearGradient(0, 0, 0, height);
-                        g.addColorStop(0, Qt.alpha(row.modelData.tint, 0.35));
-                        g.addColorStop(1, Qt.alpha(row.modelData.tint, 0));
+                        g.addColorStop(0, Qt.alpha(row.tint, 0.35));
+                        g.addColorStop(1, Qt.alpha(row.tint, 0));
                         ctx.beginPath();
                         ctx.moveTo(x0, height);
                         l.forEach((v, i) => ctx.lineTo(x0 + i * step, yOf(v)));
@@ -103,7 +106,7 @@ Card {
                         l.forEach((v, i) => i === 0 ? ctx.moveTo(x0, yOf(v)) : ctx.lineTo(x0 + i * step, yOf(v)));
                         ctx.lineWidth = 1.6;
                         ctx.lineJoin = "round";
-                        ctx.strokeStyle = row.modelData.tint;
+                        ctx.strokeStyle = row.tint;
                         ctx.stroke();
                     }
                 }
@@ -114,7 +117,7 @@ Card {
                     Rectangle {
                         anchors.right: parent.right
                         width: unit.implicitWidth + 12; height: 18; radius: 5
-                        color: row.modelData.tint
+                        color: row.tint
                         Txt { id: unit; anchors.centerIn: parent; text: row.shown[1]; color: "white"; font.pixelSize: 11; font.weight: Font.DemiBold }
                     }
                 }

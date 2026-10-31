@@ -32,8 +32,8 @@ CONFIG = os.path.join(os.environ.get("XDG_CONFIG_HOME") or os.path.join(HOME, ".
 CACHE = os.path.join(os.environ.get("XDG_CACHE_HOME") or os.path.join(HOME, ".cache"),
                      "desk-widgets")
 
-DAYS_BEFORE = 7
-DAYS_AFTER = 45
+DAYS_BEFORE = 31
+DAYS_AFTER = 120
 
 class NotICal(Exception):
     """The link worked but returned a web page, not a calendar feed."""
@@ -304,7 +304,8 @@ def main():
     if not parsed:
         return out({"ok": False, "error": "not_ical" if not_ical else "fetch_failed"})
 
-    out({"ok": True, "failed": failed, "events": build(parsed, win_start, win_end)})
+    out({"ok": True, "failed": failed, "from": win_start.isoformat(), "to": win_end.isoformat(),
+         "events": build(parsed, win_start, win_end)})
 
 if __name__ == "__main__":
     main()

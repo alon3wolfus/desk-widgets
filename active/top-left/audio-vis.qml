@@ -137,16 +137,16 @@ Card {
         spacing: 0
         visible: root.player !== null
         IconButton {
-            icon: "skip_previous"; size: 32; fill: "transparent"; ink: root.ink
+            icon: "skip_previous"; size: 32; anchors.verticalCenter: parent.verticalCenter; fill: "transparent"; ink: root.ink
             opacity: root.player && root.player.canGoPrevious ? 1 : 0.4
             onClicked: if (root.player && root.player.canGoPrevious) root.player.previous()
         }
         IconButton {
-            icon: root.playing ? "pause" : "play_arrow"; size: 36; fill: "transparent"; ink: root.ink
+            icon: root.playing ? "pause" : "play_arrow"; size: 36; anchors.verticalCenter: parent.verticalCenter; fill: "transparent"; ink: root.ink
             onClicked: if (root.player && root.player.canTogglePlaying) root.player.togglePlaying()
         }
         IconButton {
-            icon: "skip_next"; size: 32; fill: "transparent"; ink: root.ink
+            icon: "skip_next"; size: 32; anchors.verticalCenter: parent.verticalCenter; fill: "transparent"; ink: root.ink
             opacity: root.player && root.player.canGoNext ? 1 : 0.4
             onClicked: if (root.player && root.player.canGoNext) root.player.next()
         }
