@@ -140,7 +140,7 @@ Card {
             maximumLength: 8
             color: Theme.text
             font.family: Theme.sans
-            font.pixelSize: 28
+            font.pixelSize: 24
             font.weight: Font.DemiBold
             font.features: ({ "tnum": 1 })
             inputMethodHints: Qt.ImhDigitsOnly

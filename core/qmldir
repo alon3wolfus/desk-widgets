@@ -1,7 +1,9 @@
 singleton Theme Theme.qml
 singleton Time Time.qml
 singleton Settings Settings.qml
-Zone Zone.qml
+singleton Layout Layout.qml
+Desktop Desktop.qml
+DesktopView DesktopView.qml
 Card Card.qml
 Txt Txt.qml
 IconButton IconButton.qml

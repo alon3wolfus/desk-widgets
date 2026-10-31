@@ -49,11 +49,25 @@ Text uses Adwaita Sans (an Inter cut, the closest open match to SF Pro) and icon
 
 ## Turning widgets on and off
 
-Everything in `active/` is shown, everything in `inactive/` is not. Move a `.qml` file from one folder to the other and the desktop updates live. Delete the ones you'll never use.
+Everything in `active/` is shown, everything in `inactive/` is not. Move a `.qml` file from one folder to the other and the desktop updates live, or use edit mode below. Delete the ones you'll never use.
 
 Widgets stack in file name order, so prefix with numbers to control the order. Files without a prefix go to the bottom.
 
 Each widget keeps its settings as plain properties at the top of its file (city for weather, work length for pomodoro, bar count for the visualiser, and so on).
+
+## Edit mode
+
+Move `inactive/edit-widgets.qml` into `active/` and the desktop goes into edit mode, like *Edit Widgets* on macOS. The widgets rise above your windows and you can:
+
+- **drag** any widget to place it
+- **remove** one with the − in its corner (its file moves to `inactive/`)
+- **add** one from the list in the Edit Widgets card (its file moves to `active/`)
+- switch between **Zones** and **Grid** placement
+
+**Zones** is the folder system below: drop a widget in one of the nine areas and its file moves to that zone's folder, stacking with the others there.
+**Grid** puts every widget on its own cell of a screen-wide grid and keeps it where you drop it. Dropping on a taken cell picks the nearest free one. *Reset grid* starts over from the zone layout.
+
+Press **Done** to leave. That moves `edit-widgets.qml` back to `inactive/`; move it into `active/` again whenever you want to rearrange. The mode and grid positions are saved in `~/.config/desk-widgets/layout.json`.
 
 ## Placing widgets
 
@@ -174,7 +188,7 @@ Card {
 
 ```
 shell.qml       starts one stack per screen position
-core/           theme, settings, zones and shared components
+core/           theme, settings, layout, the desktop surface and shared components
 themes/         colour palettes, one JSON file per theme
 active/         widgets that are shown
 inactive/       widgets that are available

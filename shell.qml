@@ -3,7 +3,8 @@ import qs.core
 
 // Desktop widgets. Put .qml files in ./active to show them, ./inactive to hide them.
 // Files directly in ./active go to defaultZone. Put a file in a subfolder named after a
-// zone (active/top-left, active/bottom-right, ...) to place it somewhere else.
+// zone (active/top-left, active/bottom-right, ...) to place it somewhere else, or move
+// edit-widgets.qml into ./active to drag widgets around and switch to grid placement.
 // Run with: qs -c desk-widgets
 ShellRoot {
     id: root
@@ -17,28 +18,14 @@ ShellRoot {
     readonly property int insetLeft: 58
     readonly property int insetRight: 0
 
-    readonly property var zones: [
-        "top-left", "top-center", "top-right",
-        "center-left", "center", "center-right",
-        "bottom-left", "bottom-center", "bottom-right"
-    ]
-
     Blur {}
 
-    Variants {
-        model: root.zones
-
-        Zone {
-            required property string modelData
-            zone: modelData
-            isDefault: modelData === root.defaultZone
-            margin: root.margin
-            insetTop: root.insetTop
-            insetBottom: root.insetBottom
-            insetLeft: root.insetLeft
-            insetRight: root.insetRight
-            folder: Qt.resolvedUrl("active/" + modelData)
-            rootFolder: Qt.resolvedUrl("active")
-        }
+    Desktop {
+        defaultZone: root.defaultZone
+        margin: root.margin
+        insetTop: root.insetTop
+        insetBottom: root.insetBottom
+        insetLeft: root.insetLeft
+        insetRight: root.insetRight
     }
 }
