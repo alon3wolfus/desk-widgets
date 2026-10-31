@@ -3,9 +3,9 @@ import Quickshell
 import Quickshell.Io
 import qs.core
 
+// CPU, memory, disk and temperature as rings. Green, then orange and red as they fill up
 Card {
     id: root
-    height: col.implicitHeight + pad * 2
 
     property real cpu: 0
     property real ram: 0
@@ -13,8 +13,6 @@ Card {
     property real temp: 0
     property real lastTotal: 0
     property real lastIdle: 0
-
-    function pct(v) { return Math.round(v * 100) + "%"; }
 
     function parse(t) {
         for (const line of t.split("\n")) {
@@ -42,14 +40,46 @@ Card {
         onTriggered: poll.running = true
     }
 
-    Column {
-        id: col
-        anchors.fill: parent
-        spacing: 10
+    readonly property var gauges: [
+        { name: "CPU",    icon: "memory",     value: cpu,        text: Math.round(cpu * 100) + "%" },
+        { name: "Memory", icon: "memory_alt", value: ram,        text: Math.round(ram * 100) + "%" },
+        { name: "Disk",   icon: "hard_drive", value: disk,       text: Math.round(disk * 100) + "%" },
+        { name: "Temp",   icon: "thermostat", value: temp / 100, text: Math.round(temp) + "°" }
+    ]
 
-        Bar { width: parent.width; label: "CPU";  value: root.cpu;  text: root.pct(root.cpu) }
-        Bar { width: parent.width; label: "RAM";  value: root.ram;  text: root.pct(root.ram);  tint: Theme.accent2 }
-        Bar { width: parent.width; label: "Disk"; value: root.disk; text: root.pct(root.disk) }
-        Bar { width: parent.width; label: "Temp"; value: root.temp / 100; text: Math.round(root.temp) + "°C"; tint: Theme.accent2; visible: root.temp > 0 }
+    Row {
+        anchors.centerIn: parent
+
+        Repeater {
+            model: root.gauges
+
+            Column {
+                required property var modelData
+                width: (root.width - root.pad * 2) / 4
+                spacing: 6
+
+                Ring {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    width: 62
+                    thickness: 6
+                    value: modelData.value
+                    tint: modelData.value > 0.9 ? Theme.red : modelData.value > 0.75 ? Theme.orange : Theme.green
+                    Icon { anchors.centerIn: parent; name: modelData.icon; size: 22 }
+                }
+                Txt {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    text: modelData.text
+                    font.pixelSize: 15
+                    font.weight: Font.DemiBold
+                }
+                Txt {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    text: modelData.name
+                    color: Theme.textDim
+                    font.pixelSize: 11
+                    font.weight: Font.Medium
+                }
+            }
+        }
     }
 }

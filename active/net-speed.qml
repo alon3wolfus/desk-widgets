@@ -3,9 +3,9 @@ import Quickshell
 import Quickshell.Io
 import qs.core
 
+// download and upload speed with a live sparkline each, laid out like the macOS Stocks widget
 Card {
     id: root
-    height: 118
 
     property int samples: 40
     property var down: []
@@ -13,10 +13,10 @@ Card {
     property real lastRx: -1
     property real lastTx: -1
 
-    function fmt(b) {
-        if (b >= 1048576) return (b / 1048576).toFixed(1) + " MB/s";
-        if (b >= 1024) return Math.round(b / 1024) + " KB/s";
-        return Math.round(b) + " B/s";
+    function split(b) {
+        if (b >= 1048576) return [(b / 1048576).toFixed(1), "MB/s"];
+        if (b >= 1024) return [String(Math.round(b / 1024)), "KB/s"];
+        return [String(Math.round(b)), "B/s"];
     }
 
     function push(list, v) {
@@ -30,7 +30,6 @@ Card {
         if (lastRx >= 0) {
             down = push(down, Math.max(0, p[0] - lastRx));
             up = push(up, Math.max(0, p[1] - lastTx));
-            graph.requestPaint();
         }
         lastRx = p[0]; lastTx = p[1];
     }
@@ -47,43 +46,79 @@ Card {
         onTriggered: poll.running = true
     }
 
-    Row {
-        id: head
-        width: parent.width
-        spacing: 16
-        Txt { text: "Down " + root.fmt(root.down.length ? root.down[root.down.length - 1] : 0); color: Theme.accent; font.weight: Font.Medium }
-        Txt { text: "Up " + root.fmt(root.up.length ? root.up[root.up.length - 1] : 0); color: Theme.accent2; font.weight: Font.Medium }
-    }
+    Column {
+        anchors.fill: parent
 
-    Canvas {
-        id: graph
-        anchors { top: head.bottom; topMargin: 8; left: parent.left; right: parent.right; bottom: parent.bottom }
-        onWidthChanged: requestPaint()
-        onPaint: {
-            const ctx = getContext("2d");
-            ctx.clearRect(0, 0, width, height);
-            const peak = Math.max(10240, ...root.down, ...root.up);
-            const draw = (list, color) => {
-                if (list.length < 2) return;
-                const step = width / (root.samples - 1), x0 = width - (list.length - 1) * step;
-                ctx.beginPath();
-                ctx.moveTo(x0, height);
-                list.forEach((v, i) => ctx.lineTo(x0 + i * step, height - (v / peak) * (height - 2)));
-                ctx.lineTo(width, height);
-                ctx.closePath();
-                ctx.fillStyle = Qt.alpha(color, 0.25);
-                ctx.fill();
-                ctx.beginPath();
-                list.forEach((v, i) => {
-                    const x = x0 + i * step, y = height - (v / peak) * (height - 2);
-                    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-                });
-                ctx.lineWidth = 1.5;
-                ctx.strokeStyle = color;
-                ctx.stroke();
-            };
-            draw(root.down, Theme.accent);
-            draw(root.up, Theme.accent2);
+        Repeater {
+            model: [
+                { name: "Download", sub: "Received", list: root.down, tint: Theme.green },
+                { name: "Upload",   sub: "Sent",     list: root.up,   tint: Theme.blue }
+            ]
+
+            Item {
+                id: row
+                required property var modelData
+                required property int index
+                width: parent.width
+                height: parent.height / 2
+                readonly property real latest: modelData.list.length ? modelData.list[modelData.list.length - 1] : 0
+                readonly property var shown: root.split(latest)
+
+                Rectangle { visible: row.index > 0; width: parent.width; height: 1; color: Theme.raised }
+
+                Column {
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: 86
+                    Txt { text: row.modelData.name; font.pixelSize: 14; font.weight: Font.Bold }
+                    Txt { text: row.modelData.sub; color: Theme.textDim; font.pixelSize: 11 }
+                }
+
+                Canvas {
+                    id: spark
+                    x: 92
+                    width: parent.width - 92 - 92
+                    height: parent.height - 24
+                    anchors.verticalCenter: parent.verticalCenter
+                    property var list: row.modelData.list
+                    onListChanged: requestPaint()
+                    onPaint: {
+                        const ctx = getContext("2d");
+                        ctx.clearRect(0, 0, width, height);
+                        const l = list;
+                        if (l.length < 2) return;
+                        const peak = Math.max(10240, ...root.down, ...root.up);
+                        const step = width / (root.samples - 1), x0 = width - (l.length - 1) * step;
+                        const yOf = v => height - 1 - (v / peak) * (height - 2);
+                        const g = ctx.createLinearGradient(0, 0, 0, height);
+                        g.addColorStop(0, Qt.alpha(row.modelData.tint, 0.35));
+                        g.addColorStop(1, Qt.alpha(row.modelData.tint, 0));
+                        ctx.beginPath();
+                        ctx.moveTo(x0, height);
+                        l.forEach((v, i) => ctx.lineTo(x0 + i * step, yOf(v)));
+                        ctx.lineTo(width, height);
+                        ctx.closePath();
+                        ctx.fillStyle = g;
+                        ctx.fill();
+                        ctx.beginPath();
+                        l.forEach((v, i) => i === 0 ? ctx.moveTo(x0, yOf(v)) : ctx.lineTo(x0 + i * step, yOf(v)));
+                        ctx.lineWidth = 1.6;
+                        ctx.lineJoin = "round";
+                        ctx.strokeStyle = row.modelData.tint;
+                        ctx.stroke();
+                    }
+                }
+
+                Column {
+                    anchors { right: parent.right; verticalCenter: parent.verticalCenter }
+                    Txt { anchors.right: parent.right; text: row.shown[0]; font.pixelSize: 15; font.weight: Font.DemiBold }
+                    Rectangle {
+                        anchors.right: parent.right
+                        width: unit.implicitWidth + 12; height: 18; radius: 5
+                        color: row.modelData.tint
+                        Txt { id: unit; anchors.centerIn: parent; text: row.shown[1]; color: "white"; font.pixelSize: 11; font.weight: Font.DemiBold }
+                    }
+                }
+            }
         }
     }
 }

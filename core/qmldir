@@ -4,8 +4,10 @@ singleton Settings Settings.qml
 Zone Zone.qml
 Card Card.qml
 Txt Txt.qml
-Pill Pill.qml
-Toggle Toggle.qml
-Bar Bar.qml
 IconButton IconButton.qml
 RoundImage RoundImage.qml
+Stack Stack.qml
+Slot Slot.qml
+Label Label.qml
+Icon Icon.qml
+Ring Ring.qml

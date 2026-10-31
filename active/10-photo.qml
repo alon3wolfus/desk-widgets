@@ -6,8 +6,8 @@ import qs.core
 // photo frame: cycles through the pictures in `folder`, click to skip
 Card {
     id: root
-    height: 190
-    pad: 8
+    size: "medium"
+    pad: 0
 
     property string folder: Quickshell.env("HOME") + "/Pictures/desk-widgets"
     property int intervalMinutes: 5
@@ -46,7 +46,7 @@ Card {
 
     RoundImage {
         anchors.fill: parent
-        radius: Theme.radius - root.pad
+        radius: root.radius
         visible: root.current >= 0
         cache: false
         source: root.current >= 0 ? "file://" + root.photos[root.current] : ""
@@ -54,10 +54,10 @@ Card {
 
     Column {
         anchors.centerIn: parent
-        spacing: 4
+        spacing: 6
         visible: root.current < 0
-        Txt { anchors.horizontalCenter: parent.horizontalCenter; text: "Add photos to"; color: Theme.textDim }
-        Txt { anchors.horizontalCenter: parent.horizontalCenter; text: "~/Pictures/desk-widgets"; font.family: Theme.mono; font.pixelSize: 11 }
+        Icon { anchors.horizontalCenter: parent.horizontalCenter; name: "photo_library"; size: 30; color: Theme.textDim }
+        Txt { anchors.horizontalCenter: parent.horizontalCenter; text: "Add photos to ~/Pictures/desk-widgets"; color: Theme.textDim; font.pixelSize: 12 }
     }
 
     MouseArea {

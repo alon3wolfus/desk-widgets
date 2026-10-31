@@ -9,8 +9,6 @@ ShellRoot {
     id: root
 
     readonly property string defaultZone: "top-right"
-    readonly property int cardWidth: 320
-    readonly property int gap: 10
     readonly property int margin: 24
 
     // extra room for bars or docks on each edge, in px (added on top of margin)
@@ -32,8 +30,6 @@ ShellRoot {
             required property string modelData
             zone: modelData
             isDefault: modelData === root.defaultZone
-            cardWidth: root.cardWidth
-            gap: root.gap
             margin: root.margin
             insetTop: root.insetTop
             insetBottom: root.insetBottom

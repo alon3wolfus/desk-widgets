@@ -3,16 +3,17 @@ import Quickshell
 import Quickshell.Io
 import qs.core
 
-// tiny to-do list, saved to ~/.local/share/desk-widgets/todo.json
-// click an item to tick it, hover for the × to delete it
+// to-do list in the style of macOS Reminders, saved to ~/.local/share/desk-widgets/todo.json
+// click a circle to tick it, hover for the × to delete, type in the last row to add
 Card {
     id: root
-    height: col.implicitHeight + pad * 2
+    size: "medium"
 
-    property int maxShown: 6
     property var items: []
     readonly property string store: (Quickshell.env("XDG_DATA_HOME") || Quickshell.env("HOME") + "/.local/share") + "/desk-widgets/todo.json"
     readonly property int remaining: items.filter(i => !i.done).length
+    readonly property int rowH: 24
+    readonly property int maxShown: Math.max(1, Math.floor((height - pad * 2 - 34 - rowH) / rowH))
 
     function save() {
         Quickshell.execDetached(["sh", "-c", "mkdir -p \"$(dirname \"$1\")\" && printf %s \"$2\" > \"$1\"",
@@ -40,17 +41,36 @@ Card {
         }
     }
 
-    Column {
-        id: col
-        anchors.fill: parent
-        spacing: 8
+    Item {
+        id: head
+        width: parent.width
+        height: 34
 
-        Row {
-            width: parent.width
-            spacing: 8
-            Txt { text: "To do"; color: Theme.accent2; font.pixelSize: 13; font.weight: Font.Medium }
-            Txt { text: root.remaining + " left"; color: Theme.textDim }
+        Rectangle {
+            id: badge
+            width: 26; height: 26; radius: 13
+            color: Theme.accent
+            Icon { anchors.centerIn: parent; name: "format_list_bulleted"; size: 16; color: "white" }
         }
+        Txt {
+            anchors { left: badge.right; leftMargin: 8; verticalCenter: badge.verticalCenter }
+            text: "To Do"
+            color: Theme.accent
+            font.pixelSize: 15
+            font.weight: Font.Bold
+        }
+        Txt {
+            anchors { right: parent.right; verticalCenter: badge.verticalCenter }
+            text: root.remaining
+            color: Theme.accent
+            font.pixelSize: 24
+            font.weight: Font.DemiBold
+        }
+    }
+
+    Column {
+        id: list
+        anchors { top: head.bottom; left: parent.left; right: parent.right }
 
         Repeater {
             model: root.items.slice(0, root.maxShown)
@@ -59,40 +79,40 @@ Card {
                 id: row
                 required property var modelData
                 required property int index
-                width: col.width
-                height: 24
+                width: list.width
+                height: root.rowH
 
-                MouseArea {
-                    id: hover
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: root.toggle(row.index)
-                }
+                MouseArea { id: hover; anchors.fill: parent; hoverEnabled: true }
 
                 Rectangle {
-                    id: box
-                    width: 16; height: 16; radius: 8
+                    id: check
+                    width: 18; height: 18; radius: 9
                     anchors.verticalCenter: parent.verticalCenter
                     color: row.modelData.done ? Theme.accent : "transparent"
-                    border.width: 1.5
-                    border.color: Theme.accent
+                    border.width: row.modelData.done ? 0 : 1.5
+                    border.color: Theme.textFaint
+                    Icon { anchors.centerIn: parent; visible: row.modelData.done; name: "check"; size: 13; color: "white" }
+                    MouseArea {
+                        anchors.fill: parent
+                        anchors.margins: -4
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: root.toggle(row.index)
+                    }
                 }
 
                 Txt {
-                    anchors { left: box.right; leftMargin: 10; right: del.left; rightMargin: 6; verticalCenter: parent.verticalCenter }
+                    anchors { left: check.right; leftMargin: 10; right: del.left; rightMargin: 6; verticalCenter: parent.verticalCenter }
                     text: row.modelData.text
                     elide: Text.ElideRight
-                    color: row.modelData.done ? Theme.textDim : Theme.text
-                    font.strikeout: row.modelData.done
+                    color: row.modelData.done ? Theme.textFaint : Theme.text
                 }
 
-                Txt {
+                Icon {
                     id: del
                     anchors { right: parent.right; verticalCenter: parent.verticalCenter }
-                    text: "×"
-                    font.pixelSize: 16
-                    color: delMouse.containsMouse ? Theme.red : Theme.textDim
+                    name: "close"
+                    size: 15
+                    color: delMouse.containsMouse ? Theme.red : Theme.textFaint
                     visible: hover.containsMouse || delMouse.containsMouse
                     MouseArea {
                         id: delMouse
@@ -108,31 +128,34 @@ Card {
 
         Txt {
             visible: root.items.length > root.maxShown
+            height: visible ? root.rowH : 0
+            verticalAlignment: Text.AlignVCenter
+            leftPadding: 28
             text: "+" + (root.items.length - root.maxShown) + " more"
-            color: Theme.textDim
+            color: Theme.textFaint
             font.pixelSize: 11
         }
+    }
 
-        Rectangle {
-            width: parent.width; height: 34; radius: 12
-            color: Theme.raised
+    Item {
+        anchors { left: parent.left; right: parent.right; bottom: parent.bottom }
+        height: root.rowH
 
-            TextInput {
-                id: input
-                anchors { fill: parent; leftMargin: 12; rightMargin: 12 }
-                verticalAlignment: TextInput.AlignVCenter
-                color: Theme.text
-                font.family: Theme.sans
-                font.pixelSize: 12
-                clip: true
-                onAccepted: { root.add(text.trim()); text = ""; }
-            }
-            Txt {
-                anchors { left: parent.left; leftMargin: 12; verticalCenter: parent.verticalCenter }
-                visible: input.text === ""
-                text: "Add a task, press enter"
-                color: Theme.textDim
-            }
+        Icon { id: plus; anchors.verticalCenter: parent.verticalCenter; x: 1; name: "add"; size: 17; color: Theme.accent }
+        TextInput {
+            id: input
+            anchors { left: plus.right; leftMargin: 9; right: parent.right; verticalCenter: parent.verticalCenter }
+            color: Theme.text
+            font.family: Theme.sans
+            font.pixelSize: 13
+            clip: true
+            onAccepted: { root.add(text.trim()); text = ""; }
+        }
+        Txt {
+            anchors { left: input.left; verticalCenter: parent.verticalCenter }
+            visible: input.text === "" && !input.activeFocus
+            text: "New reminder"
+            color: Theme.textFaint
         }
     }
 }

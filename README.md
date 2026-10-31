@@ -35,7 +35,7 @@ Desktop widgets for [Quickshell](https://quickshell.org) on Wayland. Frosted-gla
 On Arch:
 
 ```sh
-sudo pacman -S quickshell git
+sudo pacman -S quickshell git adwaita-fonts ttf-material-symbols-variable
 sudo pacman -S cava python-dateutil upower libnotify curl   # only what the widgets you use need
 git clone https://github.com/YOUR_USER/desk-widgets ~/.config/quickshell/desk-widgets
 qs -c desk-widgets
@@ -45,7 +45,7 @@ If `quickshell` isn't in your repos, use `quickshell-git` from the AUR.
 
 Start it with your session, for example in Hyprland: `exec-once = qs -c desk-widgets`.
 
-Fonts are Rubik and CaskaydiaCove NF. Set `font` in `settings.json` to use another one.
+Text uses Adwaita Sans (an Inter cut, the closest open match to SF Pro) and icons come from Material Symbols Rounded. Set `font` in `settings.json` to use another text font.
 
 ## Turning widgets on and off
 
@@ -103,7 +103,7 @@ active/
     audio-vis.qml
 ```
 
-Widgets in one zone stack top to bottom in file name order, so prefix names with numbers to reorder them. When a stack reaches the bottom of the screen it wraps into a new column beside it. Folder names must match the zone names exactly (lowercase, hyphenated) or the widgets in them won't show.
+Widgets sit on a grid like macOS: small (1×1), medium (2×1) and large (2×2). Each widget picks its size with `size: "small"`, `"medium"` or `"large"` at the top of its file, and two small ones in a row share a line. Widgets in one zone stack top to bottom in file name order, so prefix names with numbers to reorder them. When a stack reaches the bottom of the screen it wraps into a new column beside it. Folder names must match the zone names exactly (lowercase, hyphenated) or the widgets in them won't show.
 
 ### Settings
 
@@ -112,8 +112,6 @@ At the top of `shell.qml`:
 | Setting | What it does |
 |---|---|
 | `defaultZone` | Where files directly in `active/` go |
-| `cardWidth` | Width of every widget in px |
-| `gap` | Space between widgets |
 | `margin` | Space from the screen edge |
 | `insetTop` `insetBottom` `insetLeft` `insetRight` | Extra room for a bar or dock on that edge. Set it to the bar's size in px so widgets stay clear of it |
 
@@ -166,12 +164,13 @@ import QtQuick
 import qs.core
 
 Card {
-    height: 80
-    Txt { anchors.centerIn: parent; text: "hello" }
+    size: "small"
+    Label { text: "Hello" }
+    Txt { anchors.centerIn: parent; text: "world"; font.pixelSize: 28; font.weight: Font.DemiBold }
 }
 ```
 
-`core/` has `Card`, `Txt`, `Pill`, `Toggle`, `Bar`, `IconButton`, `RoundImage`, plus the `Theme` and `Time` singletons. Because it imports `qs.core`, the file works from any zone folder. Colours come from `Theme` by role (`Theme.text`, `Theme.textDim`, `Theme.accent`, `Theme.surface`, `Theme.red` ...), so a new widget matches every theme.
+`core/` has `Card` (sizes, glass), `Txt`, `Label` (small caps heading), `Icon` (Material Symbols by name), `Ring`, `IconButton`, `RoundImage`, plus the `Theme`, `Settings` and `Time` singletons. Because it imports `qs.core`, the file works from any zone folder. Colours come from `Theme` by role (`Theme.text`, `Theme.textDim`, `Theme.accent`, `Theme.surface`, `Theme.red` ...), so a new widget matches every theme.
 
 ## Layout of the repo
 

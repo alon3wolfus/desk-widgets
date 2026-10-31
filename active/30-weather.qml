@@ -2,25 +2,51 @@ import QtQuick
 import Quickshell.Io
 import qs.core
 
-// weather from wttr.in, no API key. A sun or moon rides an arc across the full day, 00:00 to 24:00.
+// weather from wttr.in, no API key. Medium shows now and the next hours, large adds 3 days.
 // city: "Vellore", "Chennai", "51.5,-0.12", "LHR". Leave empty to guess from your IP.
+// sky: tint the card like the sky outside. Off gives a plain glass card.
 Card {
     id: root
-    height: 236
-    pad: 0
+    size: "medium"
 
     property string city: ""
     property bool imperial: false
-    property string place: city
-    property string temp: "--"
-    property string desc: "Loading"
-    property var forecast: []
+    property bool sky: true
 
+    property string place: city
+    property int temp: 0
+    property bool loaded: false
+    property string desc: "Loading"
+    property int code: 113
+    property int hi: 0
+    property int lo: 0
+    property var hours: []
+    property var days: []
     property real sunrise: 6
     property real sunset: 18
 
     readonly property real hour: Time.now.getHours() + Time.now.getMinutes() / 60
     readonly property bool isDay: hour >= sunrise && hour < sunset
+    readonly property color ink: sky ? "white" : Theme.text
+    readonly property color inkDim: sky ? Qt.alpha("white", 0.72) : Theme.textDim
+
+    // sky colours, top to bottom
+    readonly property var skyColors: {
+        const wet = [176, 200, 386, 389, 392, 395, 263, 266, 293, 296, 299, 302, 305, 308, 311, 314, 353, 356, 359].includes(code);
+        if (!isDay) return ["#0d1730", "#27375a"];
+        if (wet) return ["#3a4b60", "#62758b"];
+        if (code === 113) return ["#1f6fce", "#62a8ee"];
+        if (code === 116) return ["#3477c4", "#7aa9dc"];
+        return ["#506b88", "#8399b0"];
+    }
+
+    color: sky ? "transparent" : Theme.surface
+    gradient: sky ? skyGradient : null
+    Gradient {
+        id: skyGradient
+        GradientStop { position: 0; color: Qt.alpha(root.skyColors[0], 0.9) }
+        GradientStop { position: 1; color: Qt.alpha(root.skyColors[1], 0.9) }
+    }
 
     function toHours(t) {
         const m = /(\d+):(\d+)\s*(AM|PM)/i.exec(t);
@@ -28,33 +54,51 @@ Card {
         return (parseInt(m[1]) % 12) + (m[3].toUpperCase() === "PM" ? 12 : 0) + parseInt(m[2]) / 60;
     }
 
-    function icon(c) {
-        if (c === 113) return "☀";
-        if (c === 116) return "⛅";
-        if ([119, 122].includes(c)) return "☁";
-        if ([143, 248, 260].includes(c)) return "🌫";
-        if ([200, 386, 389, 392, 395].includes(c)) return "⛈";
-        if ([179, 227, 230, 323, 326, 329, 332, 335, 338, 350, 368, 371, 374, 377].includes(c)) return "❄";
-        return "🌧";
+    function icon(c, day) {
+        if (c === 113) return day ? "sunny" : "clear_night";
+        if (c === 116) return day ? "partly_cloudy_day" : "partly_cloudy_night";
+        if ([119, 122].includes(c)) return "cloud";
+        if ([143, 248, 260].includes(c)) return "foggy";
+        if ([200, 386, 389, 392, 395].includes(c)) return "thunderstorm";
+        if ([179, 227, 230, 323, 326, 329, 332, 335, 338, 350, 368, 371, 374, 377].includes(c)) return "weather_snowy";
+        return "rainy";
     }
+    function iconColor(c, day) { return c === 113 && day ? Theme.yellow : root.ink; }
 
     function parse(t) {
         try {
             const j = JSON.parse(t), c = j.current_condition[0], u = imperial ? "F" : "C";
-            temp = c["temp_" + u] + "°" + u;
-            desc = c.weatherDesc[0].value;
+            temp = parseInt(c["temp_" + u]);
+            code = parseInt(c.weatherCode);
+            desc = c.weatherDesc[0].value.trim();
             if (city === "") place = j.nearest_area[0].areaName[0].value;
             const astro = j.weather[0].astronomy[0];
             const rise = toHours(astro.sunrise), set = toHours(astro.sunset);
             if (rise >= 0 && set > rise) { sunrise = rise; sunset = set; }
-            forecast = j.weather.map(d => {
+            hi = parseInt(j.weather[0]["maxtemp" + u]);
+            lo = parseInt(j.weather[0]["mintemp" + u]);
+
+            // wttr gives 3-hour steps; keep the ones from now on
+            const now = new Date(), list = [{ label: "Now", code: code, temp: temp, day: isDay }];
+            for (const d of j.weather) {
                 const p = d.date.split("-");
-                return {
-                    day: Qt.formatDate(new Date(p[0], p[1] - 1, p[2]), "ddd"),
-                    max: d["maxtemp" + u], min: d["mintemp" + u],
-                    code: parseInt(d.hourly[4].weatherCode)
-                };
+                for (const h of d.hourly) {
+                    const hr = parseInt(h.time) / 100, at = new Date(p[0], p[1] - 1, p[2], hr);
+                    if (at <= now) continue;
+                    list.push({ label: Qt.formatTime(at, "h AP").replace(" ", "").toLowerCase(),
+                                code: parseInt(h.weatherCode), temp: parseInt(h["temp" + u]),
+                                day: hr >= sunrise && hr < sunset });
+                }
+            }
+            hours = list.slice(0, 6);
+
+            days = j.weather.map((d, i) => {
+                const p = d.date.split("-");
+                return { name: i === 0 ? "Today" : Qt.formatDate(new Date(p[0], p[1] - 1, p[2]), "ddd"),
+                         hi: parseInt(d["maxtemp" + u]), lo: parseInt(d["mintemp" + u]),
+                         code: parseInt(d.hourly[4].weatherCode) };
             });
+            loaded = true;
         } catch (e) {
             desc = "No connection";
         }
@@ -73,110 +117,108 @@ Card {
     }
 
     Item {
-        x: 10; y: 10
-        width: parent.width - 20
-        height: 130
+        id: now
+        width: parent.width
+        height: Theme.unit - root.pad * 2
 
-        Canvas {
-            id: arc
-            anchors.fill: parent
-            onWidthChanged: requestPaint()
-            onPaint: {
-                const ctx = getContext("2d");
-                ctx.clearRect(0, 0, width, height);
-                const cx = width / 2, cy = height - 6;
-                const rx = width / 2 - 18, ry = height - 44;
-                const at = h => {
-                    const a = Math.PI * h / 24;
-                    return [cx - rx * Math.cos(a), cy - ry * Math.sin(a)];
-                };
-                const trace = (h0, h1) => {
-                    ctx.beginPath();
-                    for (let i = 0; i <= 80; i++) {
-                        const p = at(h0 + (h1 - h0) * i / 80);
-                        if (i === 0) ctx.moveTo(p[0], p[1]); else ctx.lineTo(p[0], p[1]);
-                    }
-                    ctx.stroke();
-                };
+        Row {
+            spacing: 3
+            Txt { text: root.place || "—"; color: root.ink; font.pixelSize: 14; font.weight: Font.DemiBold }
+            Icon { anchors.verticalCenter: parent.verticalCenter; name: "near_me"; size: 12; color: root.ink; visible: root.city === "" }
+        }
+        Txt {
+            y: 14
+            text: root.loaded ? root.temp + "°" : "--"
+            color: root.ink
+            font.pixelSize: 46
+            font.weight: Font.Light
+            font.letterSpacing: -1
+        }
 
-                ctx.lineCap = "round";
-                ctx.lineWidth = 2;
-                ctx.strokeStyle = Qt.alpha(Theme.textDim, 0.3);
-                trace(0, 24);
-                ctx.lineWidth = 3;
-                ctx.strokeStyle = Qt.alpha(Theme.accent2, 0.55);
-                trace(root.sunrise, root.sunset);
-
-                const p = at(root.hour), sx = p[0], sy = p[1];
-                const glow = root.isDay ? Theme.accent2 : Theme.accent;
-                const g = ctx.createRadialGradient(sx, sy, 0, sx, sy, 24);
-                g.addColorStop(0, Qt.alpha(glow, 0.55));
-                g.addColorStop(1, Qt.alpha(glow, 0));
-                ctx.fillStyle = g;
-                ctx.beginPath();
-                ctx.arc(sx, sy, 24, 0, Math.PI * 2);
-                ctx.fill();
-
-                if (root.isDay) {
-                    ctx.strokeStyle = Theme.accent2;
-                    ctx.lineWidth = 1.8;
-                    for (let i = 0; i < 8; i++) {
-                        const a = i * Math.PI / 4;
-                        ctx.beginPath();
-                        ctx.moveTo(sx + Math.cos(a) * 10, sy + Math.sin(a) * 10);
-                        ctx.lineTo(sx + Math.cos(a) * 14, sy + Math.sin(a) * 14);
-                        ctx.stroke();
-                    }
-                    ctx.fillStyle = Theme.text;
-                    ctx.beginPath();
-                    ctx.arc(sx, sy, 7, 0, Math.PI * 2);
-                    ctx.fill();
-                } else {
-                    // crescent opening to the right
-                    const R = 9, t = Math.PI * 50 / 180;
-                    ctx.fillStyle = Theme.text;
-                    ctx.beginPath();
-                    ctx.arc(sx, sy, R, -t, t, true);
-                    ctx.quadraticCurveTo(sx - R * 1.44, sy, sx + R * Math.cos(t), sy - R * Math.sin(t));
-                    ctx.closePath();
-                    ctx.fill();
-                }
+        Column {
+            anchors.right: parent.right
+            Icon {
+                anchors.right: parent.right
+                name: root.icon(root.code, root.isDay)
+                color: root.iconColor(root.code, root.isDay)
+                size: 18
             }
-            Connections {
-                target: root
-                function onHourChanged() { arc.requestPaint(); }
-                function onSunriseChanged() { arc.requestPaint(); }
-                function onSunsetChanged() { arc.requestPaint(); }
+            Txt { anchors.right: parent.right; text: root.desc; color: root.ink; font.pixelSize: 12; font.weight: Font.DemiBold }
+            Txt {
+                anchors.right: parent.right
+                visible: root.loaded
+                text: "H:" + root.hi + "°  L:" + root.lo + "°"
+                color: root.ink
+                font.pixelSize: 12
+                font.weight: Font.Medium
             }
         }
 
-        Txt { x: 10; y: 4; text: root.temp; font.pixelSize: 30; font.weight: Font.Medium }
-        Txt { anchors.right: parent.right; anchors.rightMargin: 10; y: 10; text: root.desc; color: Theme.accent2; font.pixelSize: 13 }
-        Txt { anchors.horizontalCenter: parent.horizontalCenter; anchors.bottom: parent.bottom; text: root.place; color: Theme.textDim; font.pixelSize: 11 }
-    }
+        Row {
+            anchors.bottom: parent.bottom
+            width: parent.width
 
-    Row {
-        anchors { left: parent.left; right: parent.right; bottom: parent.bottom; margins: 12 }
-        height: 76
-
-        Repeater {
-            model: root.forecast
-
-            Rectangle {
-                required property var modelData
-                required property int index
-                width: parent.width / Math.max(1, root.forecast.length)
-                height: parent.height
-                radius: 16
-                color: index === 0 ? Theme.raised : "transparent"
+            Repeater {
+                model: root.hours
 
                 Column {
-                    anchors.centerIn: parent
-                    spacing: 3
-                    Txt { anchors.horizontalCenter: parent.horizontalCenter; text: index === 0 ? "Today" : modelData.day; color: index === 0 ? Theme.accent : Theme.textDim; font.pixelSize: 11 }
-                    Txt { anchors.horizontalCenter: parent.horizontalCenter; text: root.icon(modelData.code); font.pixelSize: 16 }
-                    Txt { anchors.horizontalCenter: parent.horizontalCenter; text: modelData.max + "° / " + modelData.min + "°"; font.pixelSize: 11 }
+                    required property var modelData
+                    width: now.width / 6
+                    spacing: 4
+                    Txt { anchors.horizontalCenter: parent.horizontalCenter; text: modelData.label; color: root.inkDim; font.pixelSize: 11; font.weight: Font.DemiBold }
+                    Icon { anchors.horizontalCenter: parent.horizontalCenter; name: root.icon(modelData.code, modelData.day); color: root.iconColor(modelData.code, modelData.day); size: 18 }
+                    Txt { anchors.horizontalCenter: parent.horizontalCenter; text: modelData.temp + "°"; color: root.ink; font.pixelSize: 13; font.weight: Font.DemiBold }
                 }
+            }
+        }
+    }
+
+    // next days, large size only
+    Column {
+        visible: root.size === "large"
+        anchors { top: now.bottom; topMargin: 14; left: parent.left; right: parent.right }
+        spacing: 0
+
+        readonly property int low: Math.min(...root.days.map(d => d.lo))
+        readonly property int high: Math.max(...root.days.map(d => d.hi))
+
+        Repeater {
+            model: root.days
+
+            Item {
+                id: dayRow
+                required property var modelData
+                required property int index
+                width: parent.width
+                height: 40
+
+                Rectangle { width: parent.width; height: 1; color: Qt.alpha(root.ink, 0.18) }
+
+                Txt { width: 56; anchors.verticalCenter: parent.verticalCenter; text: modelData.name; color: root.ink; font.pixelSize: 14; font.weight: Font.DemiBold }
+                Icon { x: 60; anchors.verticalCenter: parent.verticalCenter; name: root.icon(modelData.code, true); color: root.iconColor(modelData.code, true); size: 20 }
+                Txt { x: 100; width: 36; anchors.verticalCenter: parent.verticalCenter; horizontalAlignment: Text.AlignRight; text: modelData.lo + "°"; color: root.inkDim; font.pixelSize: 14; font.weight: Font.DemiBold }
+
+                Rectangle {
+                    id: track
+                    x: 146
+                    width: parent.width - 146 - 46
+                    anchors.verticalCenter: parent.verticalCenter
+                    height: 5; radius: 2.5
+                    color: Qt.alpha("black", 0.18)
+                    readonly property real span: Math.max(1, dayRow.parent.high - dayRow.parent.low)
+                    Rectangle {
+                        x: track.width * (dayRow.modelData.lo - dayRow.parent.low) / track.span
+                        width: Math.max(height, track.width * (dayRow.modelData.hi - dayRow.modelData.lo) / track.span)
+                        height: parent.height; radius: parent.radius
+                        gradient: Gradient {
+                            orientation: Gradient.Horizontal
+                            GradientStop { position: 0; color: Theme.teal }
+                            GradientStop { position: 1; color: Theme.orange }
+                        }
+                    }
+                }
+
+                Txt { anchors { right: parent.right; verticalCenter: parent.verticalCenter } text: modelData.hi + "°"; color: root.ink; font.pixelSize: 14; font.weight: Font.DemiBold }
             }
         }
     }

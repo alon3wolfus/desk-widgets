@@ -4,11 +4,10 @@ import qs.core
 // how far through the day, week, month and year you are
 Card {
     id: root
-    height: col.implicitHeight + pad * 2
 
     function frac(start, end) { return (Time.now - start) / (end - start); }
 
-    readonly property var bars: {
+    readonly property var rings: {
         const n = Time.now, y = n.getFullYear(), m = n.getMonth(), d = n.getDate();
         const monday = d - (n.getDay() + 6) % 7;
         return [
@@ -19,22 +18,37 @@ Card {
         ];
     }
 
-    Column {
-        id: col
-        anchors.fill: parent
-        spacing: 10
+    Row {
+        anchors.centerIn: parent
 
         Repeater {
-            model: root.bars
+            model: root.rings
 
-            Bar {
+            Column {
                 required property var modelData
-                required property int index
-                width: col.width
-                label: modelData.label
-                value: modelData.value
-                text: Math.round(modelData.value * 100) + "%"
-                tint: index % 2 ? Theme.accent2 : Theme.accent
+                width: (root.width - root.pad * 2) / 4
+                spacing: 8
+
+                Ring {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    width: 66
+                    thickness: 7
+                    value: modelData.value
+                    tint: Theme.teal
+                    Txt {
+                        anchors.centerIn: parent
+                        text: Math.round(modelData.value * 100) + "%"
+                        font.pixelSize: 14
+                        font.weight: Font.DemiBold
+                    }
+                }
+                Txt {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    text: modelData.label
+                    color: Theme.textDim
+                    font.pixelSize: 12
+                    font.weight: Font.Medium
+                }
             }
         }
     }

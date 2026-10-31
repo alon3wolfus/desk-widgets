@@ -5,10 +5,8 @@ import qs.core
 // audio visualiser fed by cava (https://github.com/karlstav/cava), reads whatever is playing
 Card {
     id: root
-    height: 110
-    pad: 14
 
-    property int bars: 36
+    property int bars: 32
     property var levels: []
     property bool missing: false
 
@@ -21,9 +19,11 @@ Card {
         onExited: code => root.missing = code !== 0
     }
 
+    Label { id: title; text: "Now Playing"; color: Theme.pink }
+
     Row {
-        anchors.fill: parent
-        spacing: 3
+        anchors { top: title.bottom; topMargin: 10; left: parent.left; right: parent.right; bottom: parent.bottom }
+        spacing: 4
 
         Repeater {
             model: root.bars
@@ -35,7 +35,8 @@ Card {
                 height: Math.max(width, level * parent.height)
                 anchors.bottom: parent.bottom
                 radius: width / 2
-                color: Qt.tint(Theme.accent, Qt.alpha(Theme.accent2, index / root.bars))
+                color: Theme.pink
+                opacity: 0.45 + level * 0.55
             }
         }
     }

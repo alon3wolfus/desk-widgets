@@ -9,8 +9,6 @@ PanelWindow {
 
     property string zone: "top-right"
     property bool isDefault: false
-    property int cardWidth: 320
-    property int gap: 10
     property int margin: 24
     property int insetTop: 0
     property int insetBottom: 0
@@ -56,8 +54,8 @@ PanelWindow {
     visible: shown > 0
     readonly property int maxHeight: screen ? screen.height - margin * 2 - insetTop - insetBottom : 1000
 
-    implicitWidth: Math.max(cardWidth, stack.implicitWidth)
-    implicitHeight: Math.min(stack.implicitHeight, maxHeight)
+    implicitWidth: Math.max(Theme.unit, stack.implicitWidth)
+    implicitHeight: Math.max(1, Math.min(stack.implicitHeight, maxHeight))
 
     color: "transparent"
     exclusionMode: ExclusionMode.Ignore
@@ -68,13 +66,11 @@ PanelWindow {
     FolderListModel { id: own; folder: win.folder; nameFilters: ["*.qml"]; showDirs: false }
     FolderListModel { id: loose; folder: win.rootFolder; nameFilters: ["*.qml"]; showDirs: false }
 
-    // fills top to bottom, then wraps into a new column beside the first
-    Flow {
+    // fills top to bottom on the widget grid, then wraps into a new column beside the first
+    Stack {
         id: stack
-        flow: Flow.TopToBottom
-        layoutDirection: parts[1] === "right" ? Qt.RightToLeft : Qt.LeftToRight
-        height: win.maxHeight
-        spacing: win.gap
+        maxHeight: win.maxHeight
+        mirror: parts[1] === "right"
 
         Repeater {
             model: win.isDefault ? loose : null
@@ -88,12 +84,14 @@ PanelWindow {
 
     Component {
         id: slot
-        Loader {
+        Slot {
             required property url fileUrl
+            required property int index
+            // loose files (directly in active/) come before the zone's own folder
+            order: (decodeURIComponent(fileUrl.toString()).startsWith(win.ownPath) ? 1000 : 0) + index
             active: win.belongs(fileUrl)
             visible: active
             source: fileUrl
-            onLoaded: item.width = Qt.binding(() => win.cardWidth)
         }
     }
 }

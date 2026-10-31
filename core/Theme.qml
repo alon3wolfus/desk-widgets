@@ -24,7 +24,7 @@ Singleton {
         accent: "#ca9ee6", accent2: "#f4b8e4", onAccent: "#232634",
         red: "#e78284", orange: "#ef9f76", yellow: "#e5c890", green: "#a6d189",
         blue: "#8caaee", purple: "#ca9ee6", pink: "#f4b8e4", teal: "#81c8be",
-        sans: "Rubik", mono: "CaskaydiaCove NF", radius: 22
+        sans: "Adwaita Sans", mono: "CaskaydiaCove NF", radius: 22
     })
 
     // themes with only one palette use it in both modes (Latte is always light, Mocha always dark)
@@ -81,7 +81,13 @@ Singleton {
 
     readonly property string sans: Settings.font || p.sans
     readonly property string mono: p.mono
+    readonly property string icons: "Material Symbols Rounded"
     readonly property int radius: p.radius
+
+    // widget grid, like macOS: small is unit x unit, medium 2 units wide, large 2 x 2
+    readonly property int unit: 170
+    readonly property int gap: 16
+    readonly property int wide: unit * 2 + gap
 
     FileView {
         path: Quickshell.shellPath("themes/" + Settings.theme + ".json")

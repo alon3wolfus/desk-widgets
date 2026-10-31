@@ -2,10 +2,10 @@ import QtQuick
 import Quickshell
 import qs.core
 
-// work / break timer, sends a notification when a session ends
+// focus / break timer, sends a notification when a session ends.
+// Scroll on the ring to change the length while it's stopped.
 Card {
     id: root
-    height: 214
 
     property int workMin: 25
     property int breakMin: 5
@@ -15,9 +15,10 @@ Card {
     property int remaining: workMin * 60
 
     readonly property int total: (onBreak ? breakMin : workMin) * 60
+    readonly property color tint: onBreak ? Theme.green : Theme.orange
     readonly property string clock: {
         const pad = n => String(n).padStart(2, "0");
-        return pad(Math.floor(remaining / 60)) + " : " + pad(remaining % 60);
+        return Math.floor(remaining / 60) + ":" + pad(remaining % 60);
     }
 
     function reset() {
@@ -38,7 +39,7 @@ Card {
         onBreak = !onBreak;
         remaining = total;
         Quickshell.execDetached(["notify-send", "-a", "Pomodoro",
-            wasWork ? "Work session done" : "Break over",
+            wasWork ? "Focus session done" : "Break over",
             wasWork ? "Take " + breakMin + " minutes." : "Back to it."]);
         running = autoNext;
     }
@@ -49,118 +50,61 @@ Card {
         onTriggered: if (--root.remaining <= 0) root.finish()
     }
 
-    Column {
-        anchors.fill: parent
-        spacing: 12
-
-        Item {
-            width: parent.width
-            height: 32
-
-            Rectangle {
-                anchors.verticalCenter: parent.verticalCenter
-                height: 28
-                width: sessionLabel.implicitWidth + 24
-                radius: 14
-                color: Theme.raised
-                Txt {
-                    id: sessionLabel
-                    anchors.centerIn: parent
-                    text: root.onBreak ? "Break" : "Work session"
-                    color: root.onBreak ? Theme.accent2 : Theme.accent
-                    font.weight: Font.Medium
-                }
-            }
-
-            // reset is the one place red shows up
-            Rectangle {
-                anchors.right: parent.right
-                width: 32; height: 32; radius: 16
-                color: resetMouse.pressed ? Qt.alpha(Theme.red, 0.45)
-                     : resetMouse.containsMouse ? Qt.alpha(Theme.red, 0.22)
-                     : Theme.raised
-                Behavior on color { ColorAnimation { duration: 90 } }
-
-                // drawn so it doesn't depend on a font having a reset glyph
-                Canvas {
-                    anchors.centerIn: parent
-                    width: 18; height: 18
-                    property color ink: resetMouse.containsMouse ? Theme.red : Theme.textDim
-                    onInkChanged: requestPaint()
-                    onPaint: {
-                        const ctx = getContext("2d");
-                        ctx.clearRect(0, 0, width, height);
-                        ctx.strokeStyle = ink;
-                        ctx.fillStyle = ink;
-                        ctx.lineWidth = 1.8;
-                        ctx.lineCap = "round";
-                        const cx = width / 2, cy = height / 2 + 0.5, r = 5.6;
-                        ctx.beginPath();
-                        ctx.arc(cx, cy, r, -Math.PI / 3, -2 * Math.PI, true);
-                        ctx.stroke();
-                        const ex = cx + r, ey = cy;
-                        ctx.beginPath();
-                        ctx.moveTo(ex, ey - 4.2);
-                        ctx.lineTo(ex - 3.6, ey + 0.6);
-                        ctx.lineTo(ex + 3.6, ey + 0.6);
-                        ctx.closePath();
-                        ctx.fill();
-                    }
-                }
-
-                MouseArea {
-                    id: resetMouse
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: root.reset()
-                }
-            }
-        }
+    Ring {
+        id: ring
+        anchors.verticalCenter: parent.verticalCenter
+        width: parent.height
+        thickness: 9
+        value: root.remaining / root.total
+        tint: root.tint
+        Behavior on value { NumberAnimation { duration: 400 } }
 
         Txt {
-            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.centerIn: parent
             text: root.clock
-            font.family: Theme.mono
-            font.pixelSize: 30
-            font.weight: Font.Medium
+            font.pixelSize: 26
+            font.weight: Font.DemiBold
         }
 
-        Rectangle {
-            anchors.horizontalCenter: parent.horizontalCenter
-            width: parent.width * 0.8
-            height: 4; radius: 2
-            color: Theme.raisedHot
-            Rectangle {
-                height: parent.height; radius: 2
-                width: parent.width * (root.remaining / root.total)
-                color: root.onBreak ? Theme.accent2 : Theme.accent
-                Behavior on width { NumberAnimation { duration: 400 } }
+        MouseArea {
+            anchors.fill: parent
+            onWheel: wheel => root.adjust(wheel.angleDelta.y > 0 ? 1 : -1)
+        }
+    }
+
+    Item {
+        anchors { left: ring.right; leftMargin: 18; right: parent.right; top: parent.top; bottom: parent.bottom }
+
+        Column {
+            spacing: 2
+            Label { text: root.onBreak ? "Break" : "Focus"; color: root.tint }
+            Txt {
+                text: (root.onBreak ? root.breakMin : root.workMin) + " min " + (root.onBreak ? "break" : "session")
+                font.pixelSize: 15
+                font.weight: Font.DemiBold
+            }
+            Txt {
+                text: "Then " + (root.onBreak ? root.workMin + " min focus" : root.breakMin + " min break")
+                color: Theme.textDim
+                font.pixelSize: 12
             }
         }
 
         Row {
-            width: parent.width
-            spacing: 8
-
-            Pill { width: 46; label: "−1m"; textSize: 12; onClicked: root.adjust(-1) }
-            Pill {
-                width: parent.width - 46 * 2 - 16
-                label: root.running ? "Pause" : (root.onBreak ? "Start break" : "Start work")
-                bold: true
-                fill: root.onBreak ? Theme.accent2 : Theme.accent
-                fillHot: Qt.lighter(fill, 1.12)
-                textColor: Theme.onAccent
+            anchors.bottom: parent.bottom
+            spacing: 10
+            IconButton {
+                size: 40
+                icon: root.running ? "pause" : "play_arrow"
+                fill: root.tint
+                ink: "white"
                 onClicked: root.running = !root.running
             }
-            Pill { width: 46; label: "+1m"; textSize: 12; onClicked: root.adjust(1) }
-        }
-
-        Toggle {
-            anchors.horizontalCenter: parent.horizontalCenter
-            label: "Auto-start next session"
-            checked: root.autoNext
-            onToggled: value => root.autoNext = value
+            IconButton {
+                size: 40
+                icon: "replay"
+                onClicked: root.reset()
+            }
         }
     }
 }

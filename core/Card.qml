@@ -1,12 +1,16 @@
 import QtQuick
 
-// rounded frosted-glass container, children go in the padded body.
+// rounded frosted-glass container on the macOS widget grid, children go in the padded body.
+// size: "small" (1x1), "medium" (2x1) or "large" (2x2). Set height yourself for anything else.
 // The blur itself comes from the compositor (see README), this is the tint, edge and sheen on top.
 Rectangle {
     id: root
     default property alias content: body.data
+    property string size: "medium"
     property int pad: 16
 
+    width: size === "small" ? Theme.unit : Theme.wide
+    height: size === "large" ? Theme.wide : Theme.unit
     radius: Theme.radius
     color: Theme.surface
     border.width: 1
@@ -21,7 +25,7 @@ Rectangle {
         visible: Theme.sheen > 0
         gradient: Gradient {
             GradientStop { position: 0; color: Qt.alpha("white", Theme.sheen) }
-            GradientStop { position: 0.55; color: "transparent" }
+            GradientStop { position: 0.6; color: "transparent" }
         }
     }
 
