@@ -15,7 +15,7 @@ ShellRoot {
     // extra room for bars or docks on each edge, in px (added on top of margin)
     readonly property int insetTop: 0
     readonly property int insetBottom: 0
-    readonly property int insetLeft: 58
+    readonly property int insetLeft: 60
     readonly property int insetRight: 0
 
     Blur {}
