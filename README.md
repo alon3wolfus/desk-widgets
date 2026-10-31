@@ -8,6 +8,8 @@ macOS-style desktop widgets for Hyprland and other Wayland compositors, built wi
   <img src="docs/edit-mode.png" width="49%" alt="Edit mode: widgets on a grid with remove buttons and the Edit Widgets card">
 </p>
 
+<sub>Wallpaper: macOS Tahoe (dark) by Apple, via <a href="https://512pixels.net/projects/default-mac-wallpapers-in-5k/">512 Pixels</a>. Calendar, music and to-do in the screenshots are sample data.</sub>
+
 Frosted-glass widgets that sit on your wallpaper, below every window, like the widgets on a Mac desktop. They come in small, medium and large sizes on a grid, follow your light / dark preference, and can be dragged around in an edit mode. Ten themes, from the default macOS glass to Catppuccin, Gruvbox, Nord, Tokyo Night and Rosé Pine.
 
 - **13 widgets**: clock, calendar, weather, music, system stats, network, battery, to-do, countdown, pomodoro, photo frame, now playing and day / year progress
@@ -32,7 +34,7 @@ Frosted-glass widgets that sit on your wallpaper, below every window, like the w
 | Battery | `battery.qml` | Charge ring, charging state and time left | `upower` |
 | To-do | `todo.qml` | A Reminders-style list: click a circle to tick, × to delete, type to add | |
 | Countdown | `countdown.qml` | Days left until an event you type in | |
-| Pomodoro | `40-pomodoro.qml` | Focus / break timer ring with a notification at the end. Scroll on the ring to change the length | `libnotify` |
+| Pomodoro | `40-pomodoro.qml` | Focus timer with short and long breaks, rounds, a daily goal, skip and reset. Click the ring to start, scroll it to add or take off minutes. Survives suspend and restarts | `libnotify`, `pipewire` for the sound |
 | Photo frame | `10-photo.qml` | Cycles through the pictures in `~/Pictures/desk-widgets`, click to skip | `shuf` |
 | Progress | `progress.qml` | How far through the day, week, month and year you are | |
 | Edit Widgets | `edit-widgets.qml` | Turns on edit mode while it's in `active/` | |
@@ -169,11 +171,46 @@ Each widget keeps its options as properties at the top of its file. Edit them an
 | Calendar | `size` | `"medium"` | `"large"` adds this month's grid |
 | | `revertAfter` | `300000` | Milliseconds before a picked day goes back to today |
 | Music | `bars` | `44` | Bars in the waveform |
-| Pomodoro | `workMin` / `breakMin` | `25` / `5` | Session lengths in minutes |
-| | `autoNext` | `true` | Start the next session on its own |
+| Pomodoro | `focusMinutes` | `25` | Length of a focus session |
+| | `shortBreakMinutes` | `5` | Break after each focus session |
+| | `longBreakMinutes` | `15` | Break after the last round |
+| | `rounds` | `4` | Focus sessions before a long break, shown as dots; `0` for no long breaks |
+| | `autoStartBreaks` | `true` | Start a break as soon as focus ends |
+| | `autoStartFocus` | `false` | Start focus as soon as a break ends |
+| | `dailyGoal` | `8` | Focus sessions a day; `0` just counts them |
+| | `notify` | `true` | Desktop notification when a timer ends |
+| | `sound` | freedesktop `complete.oga` | Sound played when a timer ends, any file `pw-play` or `paplay` can play; `""` for silent |
+| | `scrollStep` | `1` | Minutes added or taken off per scroll notch |
+| | `use24h` | `false` | 24-hour "Ends at" time |
 | Photo frame | `folder` | `~/Pictures/desk-widgets` | Where the pictures are |
 | | `intervalMinutes` | `5` | Minutes per picture |
 | Network | `samples` | `40` | Seconds of history in the sparklines |
+
+### Pomodoro
+
+The settings sit at the top of `40-pomodoro.qml`:
+
+```qml
+property int focusMinutes: 25
+property int shortBreakMinutes: 5
+property int longBreakMinutes: 15
+property int rounds: 4                 // focus sessions before a long break, 0 for never
+property bool autoStartBreaks: true
+property bool autoStartFocus: false
+property int dailyGoal: 8              // focus sessions a day, 0 just counts them
+property bool notify: true
+property string sound: "/usr/share/sounds/freedesktop/stereo/complete.oga"   // "" for silent
+property int scrollStep: 1             // minutes per scroll notch
+property bool use24h: false
+```
+
+- **Play / pause**: the orange button, or click the ring
+- **Skip**: moves to the next phase without counting the session
+- **Reset**: restarts the current timer. Press it again on a fresh timer to go back to round 1
+- **Scroll on the ring**: adds or takes off `scrollStep` minutes, even while it runs
+- The dots under the time are the rounds; after the last one comes the long break
+- "Ends at" shows when the running timer will finish, and the count under it starts over at midnight
+- The timer follows the wall clock and is saved, so suspend, a shell restart or editing the settings doesn't lose it. A timer that ran out while the shell was off moves on to the next phase and waits
 
 ## Setup notes
 
@@ -255,6 +292,7 @@ Each widget is a `.qml` file whose root is a `Card`. The desktop lists `active/`
 | `~/.config/desk-widgets/layout.json` | `mode` (`zones` or `grid`) and grid `positions` by file name |
 | `~/.config/desk-widgets/calendars.txt` | iCal links, one per line, `#` comments |
 | `~/.local/share/desk-widgets/todo.json` | To-do items |
+| `~/.local/state/quickshell/by-shell/<id>/pomodoro.json` | Pomodoro phase, round, timer and today's count |
 | `~/.cache/desk-widgets/` | Cached calendar feeds |
 
 ### layout.json
