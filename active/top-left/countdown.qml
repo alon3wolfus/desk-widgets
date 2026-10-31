@@ -3,15 +3,18 @@ import Quickshell
 import Quickshell.Io
 import qs.core
 
-// Asks for a target date (ddmmyyyy) and counts down to it.
-// The date is saved to disk, so it survives restarts. Once the day has
-// passed, the saved date is cleared and you get asked for a new one.
+// Asks for an event name + date (ddmmyyyy) and counts down to it.
+// Saved to disk, so it survives restarts. Once the day has passed it is
+// cleared and you get asked again. Click the x to remove it early.
 Card {
     id: root
     height: col.implicitHeight + pad * 2
 
-    // raw saved value, e.g. "01012027"
+    // raw saved value: "ddmmyyyy|name", e.g. "01012027|New Year"
     property string stored: ""
+
+    readonly property string datePart: stored.slice(0, 8)
+    readonly property string namePart: stored.length > 9 ? stored.slice(9) : ""
 
     function parseDate(s) {
         if (!/^\d{8}$/.test(s)) return null;
@@ -22,7 +25,12 @@ Card {
         return dt;
     }
 
-    readonly property var target: parseDate(stored)
+    function clearEvent() {
+        stored = "";
+        store.setText("");
+    }
+
+    readonly property var target: parseDate(datePart)
 
     // null if no valid date, otherwise whole days left (negative = already passed)
     readonly property var daysLeft: {
@@ -35,10 +43,7 @@ Card {
 
     // date has passed: wipe it so the prompt shows again (and stays after restart)
     onDaysLeftChanged: {
-        if (daysLeft !== null && daysLeft < 0) {
-            stored = "";
-            store.setText("");
-        }
+        if (daysLeft !== null && daysLeft < 0) clearEvent();
     }
 
     FileView {
@@ -47,6 +52,26 @@ Card {
         blockLoading: true
         printErrors: false
         onLoaded: root.stored = text().trim()
+    }
+
+    // ---- remove button ----
+    Txt {
+        visible: !root.needsDate
+        anchors.top: parent.top
+        anchors.right: parent.right
+        anchors.margins: root.pad / 2
+        text: "×"
+        font.pixelSize: 18
+        color: removeArea.containsMouse ? Theme.pink : Theme.dim
+
+        MouseArea {
+            id: removeArea
+            anchors.fill: parent
+            anchors.margins: -6
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: root.clearEvent()
+        }
     }
 
     Column {
@@ -72,7 +97,8 @@ Card {
                     color: Theme.dim
                 }
                 Txt {
-                    text: root.target ? Qt.formatDate(root.target, "d MMM yyyy") : ""
+                    text: root.namePart !== "" ? root.namePart
+                        : (root.target ? Qt.formatDate(root.target, "d MMM yyyy") : "")
                     color: Theme.pink
                     font.pixelSize: 14
                     font.weight: Font.Medium
@@ -80,15 +106,33 @@ Card {
             }
         }
 
-        // ---- date prompt ----
+        // ---- prompt ----
         Txt {
             visible: root.needsDate
-            text: "Enter a date (ddmmyyyy)"
+            text: "New countdown"
             color: Theme.dim
         }
 
         TextInput {
-            id: input
+            id: nameInput
+            visible: root.needsDate
+            width: col.width
+            maximumLength: 30
+            font.pixelSize: 16
+            color: Theme.pink
+            onAccepted: dateInput.forceActiveFocus()
+
+            Txt {
+                visible: nameInput.text.length === 0
+                text: "Event name (optional)"
+                color: Theme.dim
+                font: nameInput.font
+                opacity: 0.5
+            }
+        }
+
+        TextInput {
+            id: dateInput
             visible: root.needsDate
             width: col.width
             maximumLength: 8
@@ -97,7 +141,6 @@ Card {
             color: Theme.purple
             inputMethodHints: Qt.ImhDigitsOnly
             validator: RegularExpressionValidator { regularExpression: /^\d{0,8}$/ }
-            focus: root.needsDate
 
             property bool bad: false
             onTextChanged: bad = false
@@ -107,22 +150,23 @@ Card {
                 if (!dt) { bad = true; return; }
                 const t = Time.now, today = new Date(t.getFullYear(), t.getMonth(), t.getDate());
                 if (dt < today) { bad = true; return; }
-                root.stored = text;
-                store.setText(text);
+                root.stored = text + "|" + nameInput.text.trim();
+                store.setText(root.stored);
                 text = "";
+                nameInput.text = "";
             }
 
             Txt {
-                visible: input.text.length === 0
-                text: "01012027"
+                visible: dateInput.text.length === 0
+                text: "ddmmyyyy"
                 color: Theme.dim
-                font: input.font
+                font: dateInput.font
                 opacity: 0.4
             }
         }
 
         Txt {
-            visible: root.needsDate && input.bad
+            visible: root.needsDate && dateInput.bad
             text: "Invalid or past date. Use ddmmyyyy"
             color: Theme.pink
             font.pixelSize: 12

@@ -6,7 +6,7 @@ Card {
     id: root
     height: 124
 
-    property bool use24h: true
+    property bool use24h: false
     property bool showSeconds: true
 
     SystemClock { id: sc; precision: SystemClock.Seconds }
