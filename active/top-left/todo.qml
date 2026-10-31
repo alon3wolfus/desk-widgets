@@ -141,7 +141,22 @@ Card {
         anchors { left: parent.left; right: parent.right; bottom: parent.bottom }
         height: root.rowH
 
+        // anywhere on the row starts typing; + adds what's typed
+        MouseArea {
+            anchors.fill: parent
+            cursorShape: Qt.IBeamCursor
+            onClicked: input.forceActiveFocus()
+        }
         Icon { id: plus; anchors.verticalCenter: parent.verticalCenter; x: 1; name: "add"; size: 17; color: Theme.accent }
+        MouseArea {
+            anchors.fill: plus
+            anchors.margins: -6
+            cursorShape: Qt.PointingHandCursor
+            onClicked: {
+                if (input.text.trim() !== "") { root.add(input.text.trim()); input.text = ""; }
+                input.forceActiveFocus();
+            }
+        }
         TextInput {
             id: input
             anchors { left: plus.right; leftMargin: 9; right: parent.right; verticalCenter: parent.verticalCenter }
