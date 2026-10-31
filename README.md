@@ -327,4 +327,4 @@ A widget can declare `property string widgetPath` to be told its own file path, 
 
 ## License
 
-MIT
+[GPL-3.0](LICENSE). You can use, change and share desk-widgets; if you share a changed version, it has to stay under the GPL-3.0 with its source available.
