@@ -13,7 +13,10 @@ Card {
     readonly property string store: (Quickshell.env("XDG_DATA_HOME") || Quickshell.env("HOME") + "/.local/share") + "/desk-widgets/todo.json"
     readonly property int remaining: items.filter(i => !i.done).length
     readonly property int rowH: 24
-    readonly property int maxShown: Math.max(1, Math.floor((height - pad * 2 - 34 - rowH) / rowH))
+    // rows that fit between the header and the add row; when the list is longer, one of
+    // them becomes "+N more"
+    readonly property int fits: Math.max(1, Math.floor((height - pad * 2 - 34 - rowH) / rowH))
+    readonly property int maxShown: items.length > fits ? Math.max(1, fits - 1) : fits
 
     function save() {
         Quickshell.execDetached(["sh", "-c", "mkdir -p \"$(dirname \"$1\")\" && printf %s \"$2\" > \"$1\"",

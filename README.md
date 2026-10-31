@@ -1,59 +1,80 @@
 # desk-widgets
+macOS-style desktop widgets for Hyprland and other Wayland compositors, built with [Quickshell](https://quickshell.org)
 
-Desktop widgets for [Quickshell](https://quickshell.org) on Wayland. Frosted-glass cards (or Catppuccin, Gruvbox, Nord and more) that sit on the wallpaper layer below every window, so they never get in the way. Drop a file in a folder to turn a widget on, move it out to turn it off.
+![desk-widgets on a Hyprland desktop: clock, calendar, weather, battery, countdown and to-do on the left; music, system stats, network, pomodoro and a photo on the right](docs/desktop-light.png)
 
-![desktop](screenshots/1.png)
+<p>
+  <img src="docs/desktop-dark.png" width="49%" alt="The same desktop with the dark frosted glass look">
+  <img src="docs/edit-mode.png" width="49%" alt="Edit mode: widgets on a grid with remove buttons and the Edit Widgets card">
+</p>
+
+Frosted-glass widgets that sit on your wallpaper, below every window, like the widgets on a Mac desktop. They come in small, medium and large sizes on a grid, follow your light / dark preference, and can be dragged around in an edit mode. Ten themes, from the default macOS glass to Catppuccin, Gruvbox, Nord, Tokyo Night and Rosé Pine.
+
+- **13 widgets**: clock, calendar, weather, music, system stats, network, battery, to-do, countdown, pomodoro, photo frame, now playing and day / year progress
+- **Real blur on Hyprland**, set up automatically with nothing written to your Hyprland config
+- **Edit mode** to drag widgets, add and remove them, and switch between zone and grid placement
+- **Plain QML files**: a widget is one `.qml` file, and turning it on or off is moving that file between two folders
+- **No accounts or API keys**: weather comes from wttr.in, the calendar from any iCal link
 
 ## Widgets
 
-| | | |
-|:--:|:--:|:--:|
-| ![](screenshots/2.png)<br>**Photo frame** | ![](screenshots/3.png)<br>**Calendar** | ![](screenshots/4.png)<br>**Weather** |
-| ![](screenshots/5.png)<br>**Pomodoro** | ![](screenshots/6.png)<br>**Clock** | ![](screenshots/7.png)<br>**Audio visualiser** |
-| ![](screenshots/8.png)<br>**Now playing** | ![](screenshots/9.png)<br>**System stats** | ![](screenshots/10.png)<br>**Battery** |
-| ![](screenshots/11.png)<br>**Network speed** | ![](screenshots/12.png)<br>**To-do** | ![](screenshots/13.png)<br>**Countdown** |
-| ![](screenshots/14.png)<br>**Progress** | | |
+<img src="docs/widgets.png" alt="More widgets: analog clock, calendar date picker, day / week / month / year progress, and weather in clear, rain, storm and snow">
 
-| Widget | File | What it does | Needs |
-|---|---|---|---|
-| Photo frame | `10-photo.qml` | Cycles through `~/Pictures/desk-widgets`, click to skip | `shuf` |
-| Calendar | `20-calendar.qml` | Week strip and agenda from iCal feeds (Google Calendar works) | `python`, `python-dateutil` |
-| Weather | `30-weather.qml` | Current weather and 3 day forecast from wttr.in, no API key | `curl` |
-| Pomodoro | `40-pomodoro.qml` | Work / break timer with desktop notifications | `libnotify` |
-| Clock | `clock.qml` | Big clock with seconds and date | |
-| Audio visualiser | `audio-vis.qml` | Bars that react to whatever is playing | `cava` |
-| Now playing | `now-playing.qml` | Track, progress and controls for any MPRIS player | |
-| System stats | `system-stats.qml` | CPU, RAM, disk and temperature | |
-| Battery | `battery.qml` | Charge ring, plugged-in state, time left | `upower` |
-| Network speed | `net-speed.qml` | Live down / up graph | |
-| To-do | `todo.qml` | Click to tick, hover for × to delete, saved between restarts | |
-| Countdown | `countdown.qml` | Days left until dates you list | |
-| Progress | `progress.qml` | How far through the day, week, month and year | |
+| Widget | File | What it shows | Needs |
+| --- | --- | --- | --- |
+| Clock | `clock.qml` | Big digital time and date, or an analog face with `style: "analog"` | |
+| Calendar | `20-calendar.qml` | Today's whole timetable, scrollable. Click the date for a month picker | `python`, `python-dateutil` |
+| Weather | `30-weather.qml` | Now, the next hours and (large) 3 days, over a moving sky: sun, stars, clouds, rain, snow, fog, lightning | `curl` |
+| Music | `audio-vis.qml` | Cover, title and artist over a blurred cover, a live waveform, and previous / play / next | `cava` for the waveform |
+| Now playing | `now-playing.qml` | Cover, track, progress bar and controls for any MPRIS player | |
+| System stats | `system-stats.qml` | CPU, memory, disk activity (time spent on I/O) and temperature as rings | |
+| Network | `net-speed.qml` | Download and upload speed with live sparklines | |
+| Battery | `battery.qml` | Charge ring, charging state and time left | `upower` |
+| To-do | `todo.qml` | A Reminders-style list: click a circle to tick, × to delete, type to add | |
+| Countdown | `countdown.qml` | Days left until an event you type in | |
+| Pomodoro | `40-pomodoro.qml` | Focus / break timer ring with a notification at the end. Scroll on the ring to change the length | `libnotify` |
+| Photo frame | `10-photo.qml` | Cycles through the pictures in `~/Pictures/desk-widgets`, click to skip | `shuf` |
+| Progress | `progress.qml` | How far through the day, week, month and year you are | |
+| Edit Widgets | `edit-widgets.qml` | Turns on edit mode while it's in `active/` | |
 
 ## Install
 
-On Arch:
+Needs Quickshell 0.3 or newer with Qt 6.8+, and a Wayland compositor with the layer-shell protocol (Hyprland, Sway, niri, river, ...). On Arch:
 
-```sh
+```bash
 sudo pacman -S quickshell git adwaita-fonts ttf-material-symbols-variable
-sudo pacman -S cava python-dateutil upower libnotify curl   # only what the widgets you use need
-git clone https://github.com/YOUR_USER/desk-widgets ~/.config/quickshell/desk-widgets
+```
+
+Only what the widgets you use need:
+
+```bash
+sudo pacman -S python-dateutil curl cava upower libnotify
+```
+
+If `quickshell` isn't in your repos, use `quickshell-git` from the AUR. Then:
+
+```bash
+git clone https://github.com/alon3wolfus/desk-widgets ~/.config/quickshell/desk-widgets
 qs -c desk-widgets
 ```
 
-If `quickshell` isn't in your repos, use `quickshell-git` from the AUR.
+Start it with your session. Hyprland with the Lua config:
 
-Start it with your session, for example in Hyprland: `exec-once = qs -c desk-widgets`.
+```lua
+hl.exec_cmd("qs -c desk-widgets")
+```
 
-Text uses Adwaita Sans (an Inter cut, the closest open match to SF Pro) and icons come from Material Symbols Rounded. Set `font` in `settings.json` to use another text font.
+Hyprland with hyprlang: `exec-once = qs -c desk-widgets`. Anything else: run `qs -c desk-widgets` from your autostart. You can keep the clone anywhere and run `qs -p /path/to/desk-widgets` instead.
 
 ## Turning widgets on and off
 
-Everything in `active/` is shown, everything in `inactive/` is not. Move a `.qml` file from one folder to the other and the desktop updates live, or use edit mode below. Delete the ones you'll never use.
+Everything in `active/` is shown, everything in `inactive/` is not. Move a `.qml` file from one folder to the other and the desktop updates live. Editing a widget file reloads just that widget.
 
-Widgets stack in file name order, so prefix with numbers to control the order. Files without a prefix go to the bottom.
-
-Each widget keeps its settings as plain properties at the top of its file (city for weather, work length for pomodoro, bar count for the visualiser, and so on).
+```bash
+cd ~/.config/quickshell/desk-widgets
+mv inactive/progress.qml active/        # turn progress on
+mv active/top-left/battery.qml inactive/  # turn battery off
+```
 
 ## Edit mode
 
@@ -64,76 +85,47 @@ Move `inactive/edit-widgets.qml` into `active/` and the desktop goes into edit m
 - **add** one from the list in the Edit Widgets card (its file moves to `active/`)
 - switch between **Zones** and **Grid** placement
 
-**Zones** is the folder system below: drop a widget in one of the nine areas and its file moves to that zone's folder, stacking with the others there.
-**Grid** puts every widget on its own cell of a screen-wide grid and keeps it where you drop it. Dropping on a taken cell picks the nearest free one. *Reset grid* starts over from the zone layout.
+Press **Done** to leave. That moves `edit-widgets.qml` back to `inactive/`; move it into `active/` again to rearrange later. The Edit Widgets card floats above everything and can be moved by its header.
 
-Press **Done** to leave. That moves `edit-widgets.qml` back to `inactive/`; move it into `active/` again whenever you want to rearrange. The mode and grid positions are saved in `~/.config/desk-widgets/layout.json`.
+```bash
+mv ~/.config/quickshell/desk-widgets/inactive/edit-widgets.qml ~/.config/quickshell/desk-widgets/active/
+```
 
 ## Placing widgets
 
-By default everything in `active/` stacks in the top right. To put a widget somewhere else, move it into a subfolder of `active/` named after the spot you want. Make the folder if it isn't there. Changes show up live.
+There are two ways to place widgets, switched in edit mode. The choice and the grid positions are saved in `~/.config/desk-widgets/layout.json`.
+
+**Zones** (the default) stacks widgets in nine areas of the screen, chosen by folder:
 
 ```
-top-left      top-center      top-right
-center-left   center          center-right
-bottom-left   bottom-center   bottom-right
+active/top-left      active/top-center      active/top-right
+active/center-left   active/center          active/center-right
+active/bottom-left   active/bottom-center   active/bottom-right
 ```
 
-Examples, run from the repo folder:
+Files directly in `active/` go to `top-right`. Widgets in one zone stack top to bottom in file name order, so prefix names with numbers (`10-photo.qml`, `20-calendar.qml`) to reorder them. Two small widgets in a row share a line, and a stack that reaches the bottom of the screen wraps into a new column. In edit mode, dropping a widget into an area moves its file into that zone's folder.
 
-```sh
-# clock in the top left
-mkdir -p active/top-left && mv inactive/clock.qml active/top-left/
+**Grid** puts every widget on its own cell of a screen-wide grid and keeps it where you drop it. Like macOS, the left half of the columns lines up from the left edge and the right half from the right edge, so widgets hug the screen edges and the leftover space sits in the middle. A widget dropped across the middle line is centred on the screen. Dropping on a taken cell picks the nearest free one, and *Reset grid* starts over from the zone layout.
 
-# audio visualiser along the bottom
-mkdir -p active/bottom-center && mv inactive/audio-vis.qml active/bottom-center/
+Sizes follow macOS: small is 1×1 cell (170 px), medium 2×1, large 2×2. Each widget sets its size with `size: "small"`, `"medium"` or `"large"` at the top of its file. The calendar and weather have extra content at `large`.
 
-# several info widgets down the left side
-mkdir -p active/center-left
-mv inactive/system-stats.qml inactive/battery.qml inactive/todo.qml active/center-left/
+### Screen edges and bars
 
-# move a widget to another zone
-mv active/top-left/clock.qml active/bottom-right/
-
-# back to the default zone (top right)
-mv active/top-left/clock.qml active/
-
-# turn it off
-mv active/top-left/clock.qml inactive/
-```
-
-A layout can end up looking like this:
-
-```
-active/
-  10-photo.qml                top-right (default)
-  20-calendar.qml             top-right
-  top-left/
-    10-clock.qml
-    20-now-playing.qml
-  bottom-left/
-    10-progress.qml
-  bottom-center/
-    audio-vis.qml
-```
-
-Widgets sit on a grid like macOS: small (1×1), medium (2×1) and large (2×2). Each widget picks its size with `size: "small"`, `"medium"` or `"large"` at the top of its file, and two small ones in a row share a line. Widgets in one zone stack top to bottom in file name order, so prefix names with numbers to reorder them. When a stack reaches the bottom of the screen it wraps into a new column beside it. Folder names must match the zone names exactly (lowercase, hyphenated) or the widgets in them won't show.
-
-### Settings
-
-At the top of `shell.qml`:
+Set these at the top of `shell.qml`:
 
 | Setting | What it does |
-|---|---|
-| `defaultZone` | Where files directly in `active/` go |
-| `margin` | Space from the screen edge |
-| `insetTop` `insetBottom` `insetLeft` `insetRight` | Extra room for a bar or dock on that edge. Set it to the bar's size in px so widgets stay clear of it |
+| --- | --- |
+| `defaultZone` | Where files directly in `active/` go (`top-right`) |
+| `margin` | Space between widgets and the screen edge (24 px) |
+| `insetTop` `insetBottom` `insetLeft` `insetRight` | Extra room for a bar or dock on that edge, in px |
 
-For example, with a 58px bar on the left, `insetLeft: 58` keeps the left zones off it.
+For example, with a 60 px bar on the left, `insetLeft: 60` keeps widgets off it.
 
 ## Themes
 
-Settings live in `~/.config/desk-widgets/settings.json`, written with the defaults on first run. Edits apply live.
+![The same widgets in Catppuccin Mocha, Catppuccin Latte, Gruvbox, Nord, Tokyo Night and Rosé Pine](docs/themes.png)
+
+Settings live in `~/.config/desk-widgets/settings.json`, written with the defaults on first run. Changes apply live.
 
 ```json
 {
@@ -146,30 +138,70 @@ Settings live in `~/.config/desk-widgets/settings.json`, written with the defaul
 ```
 
 | Setting | What it does |
-|---|---|
-| `theme` | A file name from `themes/` without `.json`: `glass` (default), `catppuccin-mocha`, `catppuccin-macchiato`, `catppuccin-frappe`, `catppuccin-latte`, `gruvbox`, `nord`, `tokyo-night`, `rose-pine`, `caelestia` |
-| `mode` | `auto` follows your desktop's light / dark preference (`gsettings` color-scheme), or force `light` / `dark`. Themes with only one palette ignore it |
-| `opacity` | Multiplies card opacity. Raise it (e.g. `2`) if your compositor doesn't blur behind the widgets |
-| `font` | Overrides the theme's font |
-| `blur` | On Hyprland, blur behind the cards (see below) |
+| --- | --- |
+| `theme` | `glass` (default), `catppuccin-mocha`, `catppuccin-macchiato`, `catppuccin-frappe`, `catppuccin-latte`, `gruvbox`, `nord`, `tokyo-night`, `rose-pine` or `caelestia` |
+| `mode` | `auto` follows your desktop's light / dark preference (the `color-scheme` gsetting), or force `light` / `dark`. Themes with one palette ignore it |
+| `opacity` | Multiplies card opacity. Raise it (e.g. `1.4`) if your compositor doesn't blur behind the widgets |
+| `font` | Overrides the text font, e.g. `"Inter"` |
+| `blur` | On Hyprland, blur the wallpaper behind the cards (see below) |
 
-`caelestia` follows the colours [caelestia](https://github.com/caelestia-dots/shell) generates from your wallpaper. To make your own theme, copy a file in `themes/` and change the colours.
+`glass` is a frosted macOS look: light cards on a light desktop setting, darker frost on a dark one, so text stays readable on bright and dark wallpapers alike. `caelestia` follows the colours [caelestia](https://github.com/caelestia-dots/shell) generates from your wallpaper. To make your own theme, copy a file in `themes/` and change the colours; the file name is the theme name.
 
-**Blur.** The glass look needs the compositor to blur behind the cards. On Hyprland desk-widgets does this itself: at start it adds a layer rule for its namespace (`desk-widgets`) with `hyprctl eval`, and adds it again whenever Hyprland reloads its config. Nothing is written to your Hyprland config, and the rule goes away with the next config reload once desk-widgets stops. Set `"blur": false` in `settings.json` to turn it off.
+### Blur
+
+The glass look needs the compositor to blur behind the cards. On Hyprland desk-widgets does it itself: at start it adds a layer rule for its namespace (`desk-widgets`) with `hyprctl eval`, and adds it again whenever Hyprland reloads its config. Nothing is written to your Hyprland config. Set `"blur": false` to turn it off.
 
 On other compositors, add a blur rule for the layer namespace `desk-widgets` yourself, or raise `opacity` so the cards stay readable without it.
 
+## Widget settings
+
+Each widget keeps its options as properties at the top of its file. Edit them and the widget reloads.
+
+| Widget | Property | Default | What it does |
+| --- | --- | --- | --- |
+| Clock | `style` | `"digital"` | `"analog"` for a small watch face |
+| | `use24h` | `false` | 24-hour time |
+| | `showSeconds` | `true` | Seconds next to the time |
+| Weather | `city` | `""` | `"Chennai"`, `"51.5,-0.12"`, `"LHR"`; empty guesses from your IP |
+| | `imperial` | `false` | °F instead of °C |
+| | `sky` | `true` | The moving sky background; `false` for a plain glass card |
+| | `size` | `"medium"` | `"large"` adds a 3-day forecast |
+| Calendar | `size` | `"medium"` | `"large"` adds this month's grid |
+| | `revertAfter` | `300000` | Milliseconds before a picked day goes back to today |
+| Music | `bars` | `44` | Bars in the waveform |
+| Pomodoro | `workMin` / `breakMin` | `25` / `5` | Session lengths in minutes |
+| | `autoNext` | `true` | Start the next session on its own |
+| Photo frame | `folder` | `~/Pictures/desk-widgets` | Where the pictures are |
+| | `intervalMinutes` | `5` | Minutes per picture |
+| Network | `samples` | `40` | Seconds of history in the sparklines |
+
 ## Setup notes
 
-**Calendar.** Put your iCal links in `~/.config/desk-widgets/calendars.txt`, one per line. For Google Calendar use *Settings → your calendar → Secret address in iCal format*. Treat the link like a password. It is read only from that file and never printed, logged or stored in this repo.
+**Calendar.** Put your iCal links in `~/.config/desk-widgets/calendars.txt`, one per line. For Google Calendar use *Settings → your calendar → Secret address in iCal format*. Treat the link like a password: it is read only from that file and never printed, logged or stored in this repo. Events sync every 15 minutes, from 31 days back to 120 days ahead.
 
-**To-do.** The input box needs keyboard focus. Click it and type. If your compositor doesn't give focus to bottom layer surfaces, typing won't work.
+**To-do.** Items are saved to `~/.local/share/desk-widgets/todo.json`. Click the add row and type; Enter or + adds it.
 
-**Audio visualiser.** It starts its own `cava` and reads your default audio output, so there is nothing to configure.
+**Countdown.** Type an event name, Enter, then the date as `ddmmyyyy`, Enter. It clears itself once the day has passed.
+
+**Music.** The waveform starts its own `cava` and reads your default audio output. The track comes from MPRIS, so Spotify, browsers, mpv and most players work.
+
+**Weather** uses [wttr.in](https://wttr.in), no key or account.
+
+## FAQ
+
+**The widgets don't react to clicks near the screen edges (caelestia).** caelestia catches clicks in a band along the screen edges on empty workspaces, so you can drag its panels open. The band is as wide as its largest panel drag threshold (80 px by default) and sits above the widgets. Lower the thresholds to about 20 in caelestia's settings, or add `"dragThreshold": 20` to `dashboard`, `launcher`, `session` and `sidebar` in `~/.config/caelestia/shell.json`.
+
+**I can't see the widgets.** They live on the bottom layer, under every window. Switch to an empty workspace. Run `qs log -c desk-widgets` to see errors.
+
+**A widget I moved into `active/` doesn't show.** Check the file name ends in `.qml` and the folder name is one of the nine zones, lowercase and hyphenated. `qs log -c desk-widgets` shows QML errors with the line number.
+
+**Can I use it without Hyprland?** Yes. Everything works on any compositor with layer-shell. Only the automatic blur is Hyprland-specific.
+
+**Multiple monitors?** Widgets show on the primary screen.
 
 ## Writing your own widget
 
-Add a file to `active/` and import the shared bits:
+Add a file to `active/` and import the shared parts:
 
 ```qml
 import QtQuick
@@ -182,19 +214,116 @@ Card {
 }
 ```
 
-`core/` has `Card` (sizes, glass), `Txt`, `Label` (small caps heading), `Icon` (Material Symbols by name), `Ring`, `IconButton`, `RoundImage`, plus the `Theme`, `Settings` and `Time` singletons. Because it imports `qs.core`, the file works from any zone folder. Colours come from `Theme` by role (`Theme.text`, `Theme.textDim`, `Theme.accent`, `Theme.surface`, `Theme.red` ...), so a new widget matches every theme.
+`core/` has `Card` (sizes and glass), `Txt`, `Label` (small caps heading), `Icon` (a [Material Symbols](https://fonts.google.com/icons) name), `Ring`, `IconButton` and `RoundImage`, plus the `Theme`, `Settings`, `Layout` and `Time` singletons. Colours come from `Theme` by role (`Theme.text`, `Theme.textDim`, `Theme.accent`, `Theme.surface`, `Theme.red` ...), so a new widget matches every theme. Because it imports `qs.core`, the file works from any zone folder.
 
 ## Layout of the repo
 
 ```
-shell.qml       starts one stack per screen position
+shell.qml       starts the desktop; screen margins and insets
 core/           theme, settings, layout, the desktop surface and shared components
 themes/         colour palettes, one JSON file per theme
-active/         widgets that are shown
+active/         widgets that are shown, in zone folders
 inactive/       widgets that are available
 scripts/        helpers the widgets call (gcal.py, stats.sh, net.sh)
-screenshots/    images used in this readme
+docs/           images used in this readme
 ```
+
+## Full reference
+
+<details>
+<summary><b>Everything desk-widgets does, in detail</b> (click to expand). Written to be complete, so you can also paste this README into an AI assistant and ask it how to do something.</summary>
+
+### Overview
+
+desk-widgets is a Quickshell config written in QML. `shell.qml` creates one full-screen, transparent layer-shell surface (namespace `desk-widgets`, bottom layer, exclusion mode ignore, keyboard focus on demand) that holds every widget. Its input mask covers only the widgets, so clicks on empty desktop go through. While edit mode is on, the surface moves to the top layer and takes all input.
+
+Each widget is a `.qml` file whose root is a `Card`. The desktop lists `active/` and its nine zone folders, then reads and compiles each file itself with `Qt.createQmlObject` (Qt caches folder listings, so a file added while the shell runs would never load through a normal `Loader`). A file change rebuilds only that widget.
+
+### Files and folders
+
+| Path | What it is |
+| --- | --- |
+| `shell.qml` | Entry point. `defaultZone`, `margin`, `insetTop/Bottom/Left/Right` |
+| `active/*.qml` | Shown widgets, in `defaultZone` |
+| `active/<zone>/*.qml` | Shown widgets in that zone. Zones: `top-left`, `top-center`, `top-right`, `center-left`, `center`, `center-right`, `bottom-left`, `bottom-center`, `bottom-right` |
+| `inactive/*.qml` | Available widgets |
+| `themes/<name>.json` | Theme palettes |
+| `scripts/gcal.py` | Fetches iCal feeds, prints JSON events |
+| `scripts/stats.sh` | CPU counters, memory, per-disk I/O time, uptime, temperature |
+| `scripts/net.sh` | Total bytes received and sent |
+| `~/.config/desk-widgets/settings.json` | `theme`, `mode`, `opacity`, `font`, `blur` |
+| `~/.config/desk-widgets/layout.json` | `mode` (`zones` or `grid`) and grid `positions` by file name |
+| `~/.config/desk-widgets/calendars.txt` | iCal links, one per line, `#` comments |
+| `~/.local/share/desk-widgets/todo.json` | To-do items |
+| `~/.cache/desk-widgets/` | Cached calendar feeds |
+
+### layout.json
+
+```json
+{
+  "mode": "grid",
+  "positions": {
+    "clock.qml": { "col": 0, "row": 0 },
+    "30-weather.qml": { "col": 8, "row": 2 }
+  }
+}
+```
+
+Positions are keyed by file name, so a widget keeps its cell when its file moves between zone folders. Columns count from 0 at the left; the grid always has an even number of columns. Positions that no longer fit the screen or overlap another widget are moved to the nearest free cell. Widgets without a position get the free cell nearest to where their zone would put them.
+
+### Theme files
+
+A theme is either one palette or a `dark` and a `light` one:
+
+```json
+{
+  "name": "My theme",
+  "dark": {
+    "surface": "#1c1c1e", "surfaceOpacity": 0.68,
+    "raised": "#ffffff", "raisedOpacity": 0.14,
+    "raisedHot": "#ffffff", "raisedHotOpacity": 0.22,
+    "edge": "#ffffff", "edgeOpacity": 0.22,
+    "sheen": 0.12, "frost": 0.16,
+    "text": "#ffffff", "textDim": "#b3ffffff", "textFaint": "#73ffffff",
+    "accent": "#0a84ff", "accent2": "#ff9f0a", "onAccent": "#ffffff",
+    "red": "#ff453a", "orange": "#ff9f0a", "yellow": "#ffd60a", "green": "#32d74b",
+    "blue": "#0a84ff", "purple": "#bf5af2", "pink": "#ff375f", "teal": "#64d2ff",
+    "sans": "Adwaita Sans", "radius": 22
+  }
+}
+```
+
+`surface` is the card tint, `frost` a white haze over it, `sheen` the highlight across the top, `raised` the fill for tracks and buttons. Colours may carry alpha as `#AARRGGBB`. Missing keys fall back to Catppuccin Frappé. `{ "source": "caelestia" }` reads `~/.local/state/caelestia/scheme.json` instead.
+
+### Hyprland blur rule
+
+With `"blur": true`, on start and after every `configreloaded` event, desk-widgets runs:
+
+```lua
+hl.layer_rule({ name = "desk-widgets-blur", match = { namespace = "desk-widgets" }, blur = true, ignore_alpha = 0.05 })
+```
+
+The rule is named, so applying it again replaces it.
+
+### Core components (`import qs.core`)
+
+| Component | Properties |
+| --- | --- |
+| `Card` | `size` (`small` / `medium` / `large`), `pad` (16), `tinted` (skip the frost when painting your own background). Children go inside the padding |
+| `Txt` | A `Text` with the theme font, colour and tabular numbers |
+| `Label` | Small caps heading in `Theme.accent` |
+| `Icon` | `name` (Material Symbols), `size`, `filled`, `color` |
+| `Ring` | `value` 0–1, `tint`, `track`, `thickness`; set `width` |
+| `IconButton` | `icon`, `size`, `fill` (`"transparent"` for a bare glyph), `ink`, signal `clicked` |
+| `RoundImage` | `source`, `radius`, `blur` 0–1 |
+| `Theme` | Colours by role, `sans`, `mono`, `icons`, `radius`, `unit` (170), `gap` (16), `wide` (356), `isDark` |
+| `Settings` | The values from `settings.json` |
+| `Layout` | `mode`, `positions`, `editing`, and `activate(path)`, `deactivate(path)`, `toZone(path, zone)` |
+| `Time` | `now`, a minute-resolution clock |
+
+A widget can declare `property string widgetPath` to be told its own file path, and `readonly property bool pinned: true` to float above the grid without taking a cell (the Edit Widgets card does both).
+
+</details>
 
 ## License
 
