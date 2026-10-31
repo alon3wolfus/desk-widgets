@@ -1,11 +1,11 @@
 # desk-widgets
 macOS-style desktop widgets for Hyprland and other Wayland compositors, built with [Quickshell](https://quickshell.org)
 
-![desk-widgets on a Hyprland desktop: clock, calendar, weather, battery, countdown and to-do on the left; music, system stats, network, pomodoro and a photo on the right](docs/desktop-light.png)
+![desk-widgets on a Hyprland desktop: clock, calendar, weather, battery, countdown and to-do on the left; music, system stats, network, pomodoro and a photo on the right](docs/hero-light.jpg)
 
 <p>
-  <img src="docs/desktop-dark.png" width="49%" alt="The same desktop with the dark frosted glass look">
-  <img src="docs/edit-mode.png" width="49%" alt="Edit mode: widgets on a grid with remove buttons and the Edit Widgets card">
+  <img src="docs/hero-dark.jpg" width="49%" alt="The same desktop with the dark frosted glass look">
+  <img src="docs/edit-mode-grid.jpg" width="49%" alt="Edit mode: widgets on a grid with remove buttons and the Edit Widgets card">
 </p>
 
 <sub>Wallpaper: macOS Tahoe (dark) by Apple, via <a href="https://512pixels.net/projects/default-mac-wallpapers-in-5k/">512 Pixels</a>. Calendar, music and to-do in the screenshots are sample data.</sub>
@@ -20,7 +20,7 @@ Frosted-glass widgets that sit on your wallpaper, below every window, like the w
 
 ## Widgets
 
-<img src="docs/widgets.png" alt="More widgets: analog clock, calendar date picker, day / week / month / year progress, and weather in clear, rain, storm and snow">
+<img src="docs/widget-gallery.jpg" alt="More widgets: analog clock, calendar date picker, day / week / month / year progress, and weather in clear, rain, storm and snow">
 
 | Widget | File | What it shows | Needs |
 | --- | --- | --- | --- |
@@ -125,7 +125,7 @@ For example, with a 60 px bar on the left, `insetLeft: 60` keeps widgets off it.
 
 ## Themes
 
-![The same widgets in Catppuccin Mocha, Catppuccin Latte, Gruvbox, Nord, Tokyo Night and Rosé Pine](docs/themes.png)
+![The same widgets in Catppuccin Mocha, Catppuccin Latte, Gruvbox, Nord, Tokyo Night and Rosé Pine](docs/theme-strip.png)
 
 Settings live in `~/.config/desk-widgets/settings.json`, written with the defaults on first run. Changes apply live.
 
