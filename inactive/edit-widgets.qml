@@ -7,6 +7,7 @@ import qs.core
 // Zones: drop a widget in one of nine areas and its file moves to that zone's folder.
 // Grid: drop it on any cell and it stays there.
 // Done moves this file back to inactive/; move it into active/ to edit again.
+// The card itself floats above the grid and takes no cell; drag it by its header.
 Card {
     id: root
     size: "large"
@@ -42,6 +43,16 @@ Card {
         id: head
         width: parent.width
         height: 30
+
+        // the card floats above the grid; drag it by its header to get it out of the way
+        MouseArea {
+            anchors.fill: parent
+            anchors.margins: -root.pad
+            anchors.bottomMargin: 0
+            drag.target: root.parent
+            drag.threshold: 2
+            cursorShape: pressed ? Qt.ClosedHandCursor : Qt.OpenHandCursor
+        }
 
         Column {
             Label { text: "Edit Widgets" }

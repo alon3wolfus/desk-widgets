@@ -16,6 +16,8 @@ Item {
     readonly property bool isSlot: true
     property Item item: null
     property bool dragging: false
+    // set once a floating (pinned) widget has its first position
+    property bool floated: false
     readonly property Region region: Region { item: root; radius: Theme.radius }
 
     // the editor and anything else that shouldn't be dragged sets `pinned: true`

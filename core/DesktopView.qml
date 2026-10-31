@@ -136,8 +136,26 @@ Item {
 
     function layout() {
         const all = slots(), target = new Map(), groups = {};
-        for (const s of all) {
-            if (grid && Layout.positions[s.name]) continue;
+        // pinned widgets (the editor) float above the grid: they take no cell and block nothing
+        const floating = all.filter(s => s.item.pinned), placed = all.filter(s => !s.item.pinned);
+
+        // grid: keep stored cells that still fit the screen and don't collide; the rest
+        // (new widgets, a smaller screen, old overlaps) get placed again below
+        const kept = new Set(), taken = [];
+        if (grid) {
+            for (const s of placed.slice().sort((a, b) => a.order - b.order)) {
+                const p = Layout.positions[s.name], sp = spanOf(s);
+                if (!p) continue;
+                const me = { col: p.col, row: p.row, w: sp.w, h: sp.h };
+                if (p.col < 0 || p.row < 0 || p.col + sp.w > cols || p.row + sp.h > rows) continue;
+                if (taken.some(t => Pack.overlaps(me, t))) continue;
+                taken.push(me);
+                kept.add(s);
+            }
+        }
+
+        for (const s of placed) {
+            if (kept.has(s)) continue;
             (groups[s.zone] = groups[s.zone] || []).push(s);
         }
 
@@ -151,32 +169,37 @@ Item {
             list.forEach((s, i) => target.set(s, { x: bx + r.pos[i].x, y: by + r.pos[i].y }));
         }
 
-        // grid: widgets without a cell yet get the free one nearest to where their zone put them
         if (grid) {
-            const taken = [], fresh = {};
-            for (const s of all) {
-                const p = Layout.positions[s.name];
-                if (p) taken.push({ col: p.col, row: p.row, w: spanOf(s).w, h: spanOf(s).h });
-            }
-            for (const s of all) {
-                if (Layout.positions[s.name]) continue;
-                const t = target.get(s), sp = spanOf(s);
-                const p = Pack.nearestFree(colAt(t.x), rowAt(t.y), sp, taken, cols, rows);
+            // the rest go to the free cell nearest their old cell, or where their zone put them
+            const fresh = {};
+            for (const s of placed) {
+                if (kept.has(s)) continue;
+                const old = Layout.positions[s.name], t = target.get(s), sp = spanOf(s);
+                const p = old ? Pack.nearestFree(old.col, old.row, sp, taken, cols, rows)
+                              : Pack.nearestFree(colAt(t.x), rowAt(t.y), sp, taken, cols, rows);
                 taken.push({ col: p.col, row: p.row, w: sp.w, h: sp.h });
                 fresh[s.name] = p;
             }
             if (Object.keys(fresh).length) { Layout.place(fresh); return; }    // lays out again once saved
-            for (const s of all) {
+            for (const s of placed) {
                 const p = Layout.positions[s.name];
                 target.set(s, { x: posX(p.col, s), y: posY(p.row, s) });
             }
         }
 
-        for (const s of all) {
+        for (const s of placed) {
             if (s.dragging) continue;
             const t = target.get(s);
             s.x = Math.round(t.x);
             s.y = Math.round(t.y);
+        }
+        // floating ones start at the bottom centre, then stay wherever they're dragged
+        for (const s of floating) {
+            if (s.floated) continue;
+            s.x = Math.round(areaX + (areaW - s.width) / 2);
+            s.y = Math.round(areaY + areaH - s.height);
+            s.floated = true;
+            s.z = 5;
         }
         if (inputMask) inputMask.regions = all.map(s => s.region);
     }
@@ -187,7 +210,7 @@ Item {
             const sp = spanOf(s), taken = [];
             for (const o of slots()) {
                 const p = Layout.positions[o.name];
-                if (o !== s && p) taken.push({ col: p.col, row: p.row, w: spanOf(o).w, h: spanOf(o).h });
+                if (o !== s && p && !o.item.pinned) taken.push({ col: p.col, row: p.row, w: spanOf(o).w, h: spanOf(o).h });
             }
             const p = Pack.nearestFree(colAt(s.x), rowAt(s.y), sp, taken, cols, rows);
             return { col: p.col, row: p.row, x: posX(p.col, s), y: posY(p.row, s), w: s.width, h: s.height };
