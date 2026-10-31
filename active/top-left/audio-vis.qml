@@ -1,14 +1,29 @@
 import QtQuick
 import Quickshell.Io
+import Quickshell.Services.Mpris
 import qs.core
 
-// audio visualiser fed by cava (https://github.com/karlstav/cava), reads whatever is playing
+// what's playing, in the style of the macOS Music widget: cover, title and artist over a
+// blurred copy of the cover, with a waveform from cava (https://github.com/karlstav/cava)
+// that moves with the sound. Click the card to play / pause.
 Card {
     id: root
 
-    property int bars: 32
+    property int bars: 44
     property var levels: []
     property bool missing: false
+
+    readonly property var players: Mpris.players.values
+    readonly property var player: players.find(p => p.isPlaying) || players[0] || null
+    readonly property bool playing: player !== null && player.isPlaying
+    readonly property string art: player ? player.trackArtUrl : ""
+    readonly property bool tinted: art !== "" && backdrop.status === Image.Ready
+    // the cover is the background, so drop the glass tint (and, via tinted, the frost)
+    color: tinted ? "transparent" : Theme.surface
+    readonly property color ink: tinted ? "white" : Theme.text
+    readonly property color inkDim: tinted ? Qt.alpha("white", 0.72) : Theme.textDim
+    // the Music app's red
+    readonly property color music: "#fa2d48"
 
     Process {
         running: true
@@ -19,32 +34,107 @@ Card {
         onExited: code => root.missing = code !== 0
     }
 
-    Label { id: title; text: "Now Playing"; color: Theme.pink }
+    // blurred cover behind everything, darkened so white text reads on any artwork
+    RoundImage {
+        id: backdrop
+        parent: root
+        z: -1
+        anchors.fill: parent
+        radius: root.radius
+        blur: 1
+        source: root.art
+    }
+    Rectangle {
+        parent: root
+        z: -1
+        anchors.fill: parent
+        radius: root.radius
+        visible: root.tinted
+        gradient: Gradient {
+            GradientStop { position: 0; color: Qt.alpha("black", 0.25) }
+            GradientStop { position: 1; color: Qt.alpha("black", 0.5) }
+        }
+    }
 
+    Rectangle {
+        id: cover
+        width: 72; height: 72; radius: 10
+        color: root.tinted ? Qt.alpha("white", 0.15) : Theme.raised
+        Icon { anchors.centerIn: parent; name: "music_note"; size: 30; color: root.inkDim; visible: !root.tinted }
+        RoundImage { anchors.fill: parent; radius: 10; source: root.art }
+    }
+
+    Column {
+        anchors { left: cover.right; leftMargin: 14; right: parent.right; verticalCenter: cover.verticalCenter }
+        spacing: 1
+
+        Row {
+            spacing: 5
+            Icon {
+                anchors.verticalCenter: parent.verticalCenter
+                name: root.playing ? "graphic_eq" : "pause"
+                size: 13
+                color: root.tinted ? root.ink : root.music
+            }
+            Label {
+                anchors.verticalCenter: parent.verticalCenter
+                text: root.player ? (root.playing ? "Now Playing" : "Paused") : "Music"
+                color: root.tinted ? root.ink : root.music
+            }
+        }
+        Txt {
+            width: parent.width
+            text: root.player ? (root.player.trackTitle || "Unknown") : "Not Playing"
+            color: root.ink
+            elide: Text.ElideRight
+            font.pixelSize: 16
+            font.weight: Font.Bold
+        }
+        Txt {
+            width: parent.width
+            text: root.player ? (root.player.trackArtist || "") : "Play something to see it here"
+            color: root.inkDim
+            elide: Text.ElideRight
+            font.pixelSize: 13
+        }
+    }
+
+    // waveform: bars grow up and down from the middle, dots when it's quiet
     Row {
-        anchors { top: title.bottom; topMargin: 10; left: parent.left; right: parent.right; bottom: parent.bottom }
-        spacing: 4
+        id: wave
+        anchors { left: parent.left; right: parent.right; bottom: parent.bottom }
+        height: 46
+        spacing: 3
 
         Repeater {
             model: root.bars
 
             Rectangle {
                 required property int index
-                readonly property real level: (root.levels[index] || 0) / 100
-                width: (parent.width - (root.bars - 1) * parent.spacing) / root.bars
-                height: Math.max(width, level * parent.height)
-                anchors.bottom: parent.bottom
+                readonly property real level: root.playing ? (root.levels[index] || 0) / 100 : 0
+                width: (wave.width - (root.bars - 1) * wave.spacing) / root.bars
+                height: Math.max(width, level * wave.height)
+                anchors.verticalCenter: parent.verticalCenter
                 radius: width / 2
-                color: Theme.pink
-                opacity: 0.45 + level * 0.55
+                color: root.tinted ? "white" : root.music
+                opacity: 0.35 + level * 0.65
+                Behavior on height { NumberAnimation { duration: 60 } }
             }
         }
     }
 
     Txt {
-        anchors.centerIn: parent
+        anchors.centerIn: wave
         visible: root.missing
-        text: "cava isn't installed or failed to start"
-        color: Theme.textDim
+        text: "Install cava for the waveform"
+        color: root.inkDim
+        font.pixelSize: 11
+    }
+
+    MouseArea {
+        anchors.fill: parent
+        anchors.margins: -root.pad
+        cursorShape: root.player ? Qt.PointingHandCursor : Qt.ArrowCursor
+        onClicked: if (root.player && root.player.canTogglePlaying) root.player.togglePlaying()
     }
 }

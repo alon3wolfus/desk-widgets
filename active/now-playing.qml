@@ -11,6 +11,8 @@ Card {
     readonly property real progress: player && player.length > 0 ? player.position / player.length : 0
     readonly property string art: player ? player.trackArtUrl : ""
     readonly property bool tinted: art !== "" && backdrop.status === Image.Ready
+    // the cover is the background, so drop the glass tint (and, via tinted, the frost)
+    color: tinted ? "transparent" : Theme.surface
     readonly property color ink: tinted ? "white" : Theme.text
     readonly property color inkDim: tinted ? Qt.alpha("white", 0.7) : Theme.textDim
 
