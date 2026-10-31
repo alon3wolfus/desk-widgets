@@ -33,9 +33,11 @@ Item {
     readonly property int areaH: height - areaY - margin - insetBottom
     readonly property int cols: Math.max(1, Math.floor((areaW + Theme.gap) / cell))
     readonly property int rows: Math.max(1, Math.floor((areaH + Theme.gap) / cell))
-    // the grid is centred in the free area
-    readonly property int ox: areaX + Math.floor((areaW - (cols * cell - Theme.gap)) / 2)
-    readonly property int oy: areaY + Math.floor((areaH - (rows * cell - Theme.gap)) / 2)
+    // like macOS, the left half of the columns lines up from the left edge and the right half
+    // from the right edge (rows: top and bottom), so widgets hug the screen edges and the
+    // space that doesn't fit a whole cell ends up in the middle
+    readonly property int splitCol: Math.ceil(cols / 2)
+    readonly property int splitRow: Math.ceil(rows / 2)
 
     // ---- which files are active ----
 
@@ -43,8 +45,13 @@ Item {
         id: rootFiles
         folder: "file://" + encodeURI(desk.activePath)
         nameFilters: ["*.qml"]; showDirs: false
+        // count can change before the new rows hold data, so also sync when they fill in
         onCountChanged: desk.sync()
         onStatusChanged: desk.sync()
+        onRowsInserted: desk.sync()
+        onRowsRemoved: desk.sync()
+        onDataChanged: desk.sync()
+        onModelReset: desk.sync()
     }
     Instantiator {
         id: zoneFiles
@@ -56,6 +63,10 @@ Item {
             nameFilters: ["*.qml"]; showDirs: false
             onCountChanged: desk.sync()
             onStatusChanged: desk.sync()
+            onRowsInserted: desk.sync()
+            onRowsRemoved: desk.sync()
+            onDataChanged: desk.sync()
+            onModelReset: desk.sync()
         }
     }
 
@@ -102,8 +113,15 @@ Item {
         return out;
     }
     function spanOf(s) { return Pack.span(s.item.width, s.item.height, Theme.unit, Theme.gap); }
-    function cellX(col) { return ox + col * cell; }
-    function cellY(row) { return oy + row * cell; }
+    function cellX(col) { return col < splitCol ? areaX + col * cell : areaX + areaW - (cols - col) * cell + Theme.gap; }
+    function cellY(row) { return row < splitRow ? areaY + row * cell : areaY + areaH - (rows - row) * cell + Theme.gap; }
+    function nearest(v, n, at) {
+        let best = 0;
+        for (let i = 1; i < n; i++) if (Math.abs(at(i) - v) < Math.abs(at(best) - v)) best = i;
+        return best;
+    }
+    function colAt(x) { return nearest(x, cols, cellX); }
+    function rowAt(y) { return nearest(y, rows, cellY); }
 
     function layout() {
         const all = slots(), target = new Map(), groups = {};
@@ -132,7 +150,7 @@ Item {
             for (const s of all) {
                 if (Layout.positions[s.name]) continue;
                 const t = target.get(s), sp = spanOf(s);
-                const p = Pack.nearestFree(Math.round((t.x - ox) / cell), Math.round((t.y - oy) / cell), sp, taken, cols, rows);
+                const p = Pack.nearestFree(colAt(t.x), rowAt(t.y), sp, taken, cols, rows);
                 taken.push({ col: p.col, row: p.row, w: sp.w, h: sp.h });
                 fresh[s.name] = p;
             }
@@ -160,7 +178,7 @@ Item {
                 const p = Layout.positions[o.name];
                 if (o !== s && p) taken.push({ col: p.col, row: p.row, w: spanOf(o).w, h: spanOf(o).h });
             }
-            const p = Pack.nearestFree(Math.round((s.x - ox) / cell), Math.round((s.y - oy) / cell), sp, taken, cols, rows);
+            const p = Pack.nearestFree(colAt(s.x), rowAt(s.y), sp, taken, cols, rows);
             return { col: p.col, row: p.row, x: cellX(p.col), y: cellY(p.row), w: s.width, h: s.height };
         }
         const cx = s.x + s.width / 2, cy = s.y + s.height / 2;
