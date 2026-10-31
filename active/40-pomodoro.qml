@@ -67,7 +67,7 @@ Card {
                     id: sessionLabel
                     anchors.centerIn: parent
                     text: root.onBreak ? "Break" : "Work session"
-                    color: root.onBreak ? Theme.pink : Theme.purple
+                    color: root.onBreak ? Theme.accent2 : Theme.accent
                     font.weight: Font.Medium
                 }
             }
@@ -85,7 +85,7 @@ Card {
                 Canvas {
                     anchors.centerIn: parent
                     width: 18; height: 18
-                    property color ink: resetMouse.containsMouse ? Theme.red : Theme.dim
+                    property color ink: resetMouse.containsMouse ? Theme.red : Theme.textDim
                     onInkChanged: requestPaint()
                     onPaint: {
                         const ctx = getContext("2d");
@@ -134,7 +134,7 @@ Card {
             Rectangle {
                 height: parent.height; radius: 2
                 width: parent.width * (root.remaining / root.total)
-                color: root.onBreak ? Theme.pink : Theme.purple
+                color: root.onBreak ? Theme.accent2 : Theme.accent
                 Behavior on width { NumberAnimation { duration: 400 } }
             }
         }
@@ -148,7 +148,7 @@ Card {
                 width: parent.width - 46 * 2 - 16
                 label: root.running ? "Pause" : (root.onBreak ? "Start break" : "Start work")
                 bold: true
-                fill: root.onBreak ? Theme.pink : Theme.purple
+                fill: root.onBreak ? Theme.accent2 : Theme.accent
                 fillHot: Qt.lighter(fill, 1.12)
                 textColor: Theme.onAccent
                 onClicked: root.running = !root.running

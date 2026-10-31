@@ -6,7 +6,7 @@ Item {
     property string label: ""
     property string text: ""
     property real value: 0
-    property color tint: Theme.purple
+    property color tint: Theme.accent
     height: 18
 
     Txt {
@@ -14,7 +14,7 @@ Item {
         width: 46
         anchors.verticalCenter: parent.verticalCenter
         text: root.label
-        color: Theme.dim
+        color: Theme.textDim
     }
 
     Txt {

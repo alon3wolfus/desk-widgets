@@ -1,6 +1,6 @@
 # desk-widgets
 
-Desktop widgets for [Quickshell](https://quickshell.org) on Wayland. Catppuccin Frappé, translucent cards that sit on the wallpaper layer below every window, so they never get in the way. Drop a file in a folder to turn a widget on, move it out to turn it off.
+Desktop widgets for [Quickshell](https://quickshell.org) on Wayland. Frosted-glass cards (or Catppuccin, Gruvbox, Nord and more) that sit on the wallpaper layer below every window, so they never get in the way. Drop a file in a folder to turn a widget on, move it out to turn it off.
 
 ![desktop](screenshots/1.png)
 
@@ -45,7 +45,7 @@ If `quickshell` isn't in your repos, use `quickshell-git` from the AUR.
 
 Start it with your session, for example in Hyprland: `exec-once = qs -c desk-widgets`.
 
-Fonts are Rubik and CaskaydiaCove NF. Change them in `core/Theme.qml`.
+Fonts are Rubik and CaskaydiaCove NF. Set `font` in `settings.json` to use another one.
 
 ## Turning widgets on and off
 
@@ -119,6 +119,36 @@ At the top of `shell.qml`:
 
 For example, with a 58px bar on the left, `insetLeft: 58` keeps the left zones off it.
 
+## Themes
+
+Settings live in `~/.config/desk-widgets/settings.json`, written with the defaults on first run. Edits apply live.
+
+```json
+{
+  "theme": "glass",
+  "mode": "auto",
+  "opacity": 1,
+  "font": ""
+}
+```
+
+| Setting | What it does |
+|---|---|
+| `theme` | A file name from `themes/` without `.json`: `glass` (default), `catppuccin-mocha`, `catppuccin-macchiato`, `catppuccin-frappe`, `catppuccin-latte`, `gruvbox`, `nord`, `tokyo-night`, `rose-pine`, `caelestia` |
+| `mode` | `auto` follows your desktop's light / dark preference (`gsettings` color-scheme), or force `light` / `dark`. Themes with only one palette ignore it |
+| `opacity` | Multiplies card opacity. Raise it (e.g. `2`) if your compositor doesn't blur behind the widgets |
+| `font` | Overrides the theme's font |
+
+`caelestia` follows the colours [caelestia](https://github.com/caelestia-dots/shell) generates from your wallpaper. To make your own theme, copy a file in `themes/` and change the colours.
+
+**Blur.** The glass look needs the compositor to blur behind the cards. Widgets use the layer namespace `desk-widgets`. On Hyprland (Lua config) add a layer rule:
+
+```lua
+hl.layer_rule({ match = { namespace = "desk-widgets" }, blur = true, ignore_alpha = 0.05 })
+```
+
+`ignore_alpha` keeps the blur to the cards, not the empty space around them. With a hyprlang config, use the matching `blur` and `ignorealpha` layer rules.
+
 ## Setup notes
 
 **Calendar.** Put your iCal links in `~/.config/desk-widgets/calendars.txt`, one per line. For Google Calendar use *Settings → your calendar → Secret address in iCal format*. Treat the link like a password. It is read only from that file and never printed, logged or stored in this repo.
@@ -141,13 +171,14 @@ Card {
 }
 ```
 
-`core/` has `Card`, `Txt`, `Pill`, `Toggle`, `Bar`, `IconButton`, `RoundImage`, plus the `Theme` and `Time` singletons. Because it imports `qs.core`, the file works from any zone folder. Colours come from `Theme`, so a new widget matches the rest.
+`core/` has `Card`, `Txt`, `Pill`, `Toggle`, `Bar`, `IconButton`, `RoundImage`, plus the `Theme` and `Time` singletons. Because it imports `qs.core`, the file works from any zone folder. Colours come from `Theme` by role (`Theme.text`, `Theme.textDim`, `Theme.accent`, `Theme.surface`, `Theme.red` ...), so a new widget matches every theme.
 
 ## Layout of the repo
 
 ```
 shell.qml       starts one stack per screen position
-core/           theme, zones and shared components
+core/           theme, settings, zones and shared components
+themes/         colour palettes, one JSON file per theme
 active/         widgets that are shown
 inactive/       widgets that are available
 scripts/        helpers the widgets call (gcal.py, stats.sh, net.sh)

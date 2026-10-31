@@ -34,7 +34,7 @@ Card {
                 label: modelData.label
                 value: modelData.value
                 text: Math.round(modelData.value * 100) + "%"
-                tint: index % 2 ? Theme.pink : Theme.purple
+                tint: index % 2 ? Theme.accent2 : Theme.accent
             }
         }
     }

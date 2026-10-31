@@ -23,7 +23,7 @@ Card {
         anchors.verticalCenter: parent.verticalCenter
         color: Theme.raised
 
-        Txt { anchors.centerIn: parent; text: "♪"; color: Theme.purple; font.pixelSize: 26 }
+        Txt { anchors.centerIn: parent; text: "♪"; color: Theme.accent; font.pixelSize: 26 }
         RoundImage {
             anchors.fill: parent
             radius: 14
@@ -45,7 +45,7 @@ Card {
         Txt {
             width: parent.width
             text: root.player ? root.player.trackArtist : ""
-            color: Theme.dim
+            color: Theme.textDim
             elide: Text.ElideRight
         }
 
@@ -57,7 +57,7 @@ Card {
             Rectangle {
                 height: parent.height; radius: 2
                 width: parent.width * Math.max(0, Math.min(1, root.progress))
-                color: Theme.purple
+                color: Theme.accent
             }
         }
 
@@ -73,7 +73,7 @@ Card {
             IconButton {
                 kind: root.player && root.player.isPlaying ? "pause" : "play"
                 size: 36
-                fill: Theme.purple
+                fill: Theme.accent
                 ink: Theme.onAccent
                 onClicked: if (root.player) root.player.togglePlaying()
             }

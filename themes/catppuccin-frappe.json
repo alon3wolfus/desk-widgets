@@ -1,0 +1,29 @@
+{
+  "name": "Catppuccin Frappé",
+  "dark": {
+    "surface": "#303446",
+    "surfaceOpacity": 0.85,
+    "raised": "#51576d",
+    "raisedOpacity": 0.4,
+    "raisedHot": "#626880",
+    "raisedHotOpacity": 0.6,
+    "edge": "#737994",
+    "edgeOpacity": 0.35,
+    "sheen": 0.0,
+    "text": "#c6d0f5",
+    "textDim": "#a5adce",
+    "textFaint": "#838ba7",
+    "accent": "#ca9ee6",
+    "accent2": "#f4b8e4",
+    "onAccent": "#232634",
+    "red": "#e78284",
+    "orange": "#ef9f76",
+    "yellow": "#e5c890",
+    "green": "#a6d189",
+    "blue": "#8caaee",
+    "purple": "#ca9ee6",
+    "pink": "#f4b8e4",
+    "teal": "#81c8be",
+    "radius": 22
+  }
+}

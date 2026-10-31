@@ -32,7 +32,7 @@ Card {
         width: 68; height: 68
         anchors.verticalCenter: parent.verticalCenter
         property real level: root.level
-        property color tint: root.plugged ? Theme.pink : Theme.purple
+        property color tint: root.plugged ? Theme.accent2 : Theme.accent
         onLevelChanged: requestPaint()
         onTintChanged: requestPaint()
         onPaint: {
@@ -59,7 +59,7 @@ Card {
     Column {
         anchors { left: ring.right; leftMargin: 16; right: parent.right; verticalCenter: parent.verticalCenter }
         spacing: 3
-        Txt { text: "Battery"; color: Theme.pink; font.pixelSize: 13; font.weight: Font.Medium }
-        Txt { width: parent.width; text: root.status; color: Theme.dim; wrapMode: Text.WordWrap }
+        Txt { text: "Battery"; color: Theme.accent2; font.pixelSize: 13; font.weight: Font.Medium }
+        Txt { width: parent.width; text: root.status; color: Theme.textDim; wrapMode: Text.WordWrap }
     }
 }

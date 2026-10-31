@@ -1,5 +1,6 @@
 singleton Theme Theme.qml
 singleton Time Time.qml
+singleton Settings Settings.qml
 Zone Zone.qml
 Card Card.qml
 Txt Txt.qml

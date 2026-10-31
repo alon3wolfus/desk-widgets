@@ -51,8 +51,8 @@ Card {
         id: head
         width: parent.width
         spacing: 16
-        Txt { text: "Down " + root.fmt(root.down.length ? root.down[root.down.length - 1] : 0); color: Theme.purple; font.weight: Font.Medium }
-        Txt { text: "Up " + root.fmt(root.up.length ? root.up[root.up.length - 1] : 0); color: Theme.pink; font.weight: Font.Medium }
+        Txt { text: "Down " + root.fmt(root.down.length ? root.down[root.down.length - 1] : 0); color: Theme.accent; font.weight: Font.Medium }
+        Txt { text: "Up " + root.fmt(root.up.length ? root.up[root.up.length - 1] : 0); color: Theme.accent2; font.weight: Font.Medium }
     }
 
     Canvas {
@@ -82,8 +82,8 @@ Card {
                 ctx.strokeStyle = color;
                 ctx.stroke();
             };
-            draw(root.down, Theme.purple);
-            draw(root.up, Theme.pink);
+            draw(root.down, Theme.accent);
+            draw(root.up, Theme.accent2);
         }
     }
 }

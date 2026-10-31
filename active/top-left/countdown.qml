@@ -62,7 +62,7 @@ Card {
         anchors.margins: root.pad / 2
         text: "×"
         font.pixelSize: 18
-        color: removeArea.containsMouse ? Theme.pink : Theme.dim
+        color: removeArea.containsMouse ? Theme.accent2 : Theme.textDim
 
         MouseArea {
             id: removeArea
@@ -88,18 +88,18 @@ Card {
                 text: root.daysLeft === null ? "" : (root.daysLeft === 0 ? "Today" : root.daysLeft)
                 font.pixelSize: 42
                 font.weight: Font.Medium
-                color: Theme.purple
+                color: Theme.accent
             }
             Column {
                 anchors.verticalCenter: parent.verticalCenter
                 Txt {
                     text: root.daysLeft > 0 ? (root.daysLeft === 1 ? "day until" : "days until") : ""
-                    color: Theme.dim
+                    color: Theme.textDim
                 }
                 Txt {
                     text: root.namePart !== "" ? root.namePart
                         : (root.target ? Qt.formatDate(root.target, "d MMM yyyy") : "")
-                    color: Theme.pink
+                    color: Theme.accent2
                     font.pixelSize: 14
                     font.weight: Font.Medium
                 }
@@ -110,7 +110,7 @@ Card {
         Txt {
             visible: root.needsDate
             text: "New countdown"
-            color: Theme.dim
+            color: Theme.textDim
         }
 
         TextInput {
@@ -119,13 +119,13 @@ Card {
             width: col.width
             maximumLength: 30
             font.pixelSize: 16
-            color: Theme.pink
+            color: Theme.accent2
             onAccepted: dateInput.forceActiveFocus()
 
             Txt {
                 visible: nameInput.text.length === 0
                 text: "Event name (optional)"
-                color: Theme.dim
+                color: Theme.textDim
                 font: nameInput.font
                 opacity: 0.5
             }
@@ -138,7 +138,7 @@ Card {
             maximumLength: 8
             font.pixelSize: 24
             font.weight: Font.Medium
-            color: Theme.purple
+            color: Theme.accent
             inputMethodHints: Qt.ImhDigitsOnly
             validator: RegularExpressionValidator { regularExpression: /^\d{0,8}$/ }
 
@@ -159,7 +159,7 @@ Card {
             Txt {
                 visible: dateInput.text.length === 0
                 text: "ddmmyyyy"
-                color: Theme.dim
+                color: Theme.textDim
                 font: dateInput.font
                 opacity: 0.4
             }
@@ -168,7 +168,7 @@ Card {
         Txt {
             visible: root.needsDate && dateInput.bad
             text: "Invalid or past date. Use ddmmyyyy"
-            color: Theme.pink
+            color: Theme.accent2
             font.pixelSize: 12
         }
     }

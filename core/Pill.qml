@@ -5,7 +5,7 @@ Rectangle {
     property string label: ""
     property color fill: Theme.raised
     property color fillHot: Theme.raisedHot
-    property color textColor: Theme.white
+    property color textColor: Theme.text
     property int textSize: 13
     property bool bold: false
     signal clicked()

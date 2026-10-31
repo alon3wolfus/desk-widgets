@@ -31,7 +31,7 @@ Card {
                 anchors.left: hm.right
                 anchors.leftMargin: 6
                 anchors.baseline: hm.baseline
-                color: Theme.purple
+                color: Theme.accent
                 font.pixelSize: 18
                 text: (root.showSeconds ? Qt.formatTime(sc.date, ":ss") : "") + (root.use24h ? "" : " " + Qt.formatTime(sc.date, "AP"))
             }
@@ -40,7 +40,7 @@ Card {
         Txt {
             anchors.horizontalCenter: parent.horizontalCenter
             text: Qt.formatDate(sc.date, "dddd, d MMMM")
-            color: Theme.pink
+            color: Theme.accent2
             font.pixelSize: 13
         }
     }

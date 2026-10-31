@@ -5,7 +5,7 @@ Rectangle {
     id: root
     property string kind: "play"
     property color fill: Theme.raised
-    property color ink: Theme.white
+    property color ink: Theme.text
     property int size: 32
     signal clicked()
 

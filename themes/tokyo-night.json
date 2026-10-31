@@ -1,0 +1,29 @@
+{
+  "name": "Tokyo Night",
+  "dark": {
+    "surface": "#1a1b26",
+    "surfaceOpacity": 0.88,
+    "raised": "#292e42",
+    "raisedOpacity": 0.6,
+    "raisedHot": "#3b4261",
+    "raisedHotOpacity": 0.8,
+    "edge": "#414868",
+    "edgeOpacity": 0.5,
+    "sheen": 0.0,
+    "text": "#c0caf5",
+    "textDim": "#a9b1d6",
+    "textFaint": "#565f89",
+    "accent": "#7aa2f7",
+    "accent2": "#bb9af7",
+    "onAccent": "#1a1b26",
+    "red": "#f7768e",
+    "orange": "#ff9e64",
+    "yellow": "#e0af68",
+    "green": "#9ece6a",
+    "blue": "#7aa2f7",
+    "purple": "#bb9af7",
+    "pink": "#ff007c",
+    "teal": "#73daca",
+    "radius": 18
+  }
+}

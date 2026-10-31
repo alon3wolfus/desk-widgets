@@ -1,0 +1,29 @@
+{
+  "name": "Nord",
+  "dark": {
+    "surface": "#2e3440",
+    "surfaceOpacity": 0.88,
+    "raised": "#434c5e",
+    "raisedOpacity": 0.5,
+    "raisedHot": "#4c566a",
+    "raisedHotOpacity": 0.7,
+    "edge": "#4c566a",
+    "edgeOpacity": 0.5,
+    "sheen": 0.0,
+    "text": "#eceff4",
+    "textDim": "#d8dee9",
+    "textFaint": "#7b88a1",
+    "accent": "#88c0d0",
+    "accent2": "#81a1c1",
+    "onAccent": "#2e3440",
+    "red": "#bf616a",
+    "orange": "#d08770",
+    "yellow": "#ebcb8b",
+    "green": "#a3be8c",
+    "blue": "#81a1c1",
+    "purple": "#b48ead",
+    "pink": "#b48ead",
+    "teal": "#8fbcbb",
+    "radius": 18
+  }
+}

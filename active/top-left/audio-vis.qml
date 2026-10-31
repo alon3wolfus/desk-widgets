@@ -35,7 +35,7 @@ Card {
                 height: Math.max(width, level * parent.height)
                 anchors.bottom: parent.bottom
                 radius: width / 2
-                color: Qt.tint(Theme.purple, Qt.alpha(Theme.pink, index / root.bars))
+                color: Qt.tint(Theme.accent, Qt.alpha(Theme.accent2, index / root.bars))
             }
         }
     }
@@ -44,6 +44,6 @@ Card {
         anchors.centerIn: parent
         visible: root.missing
         text: "cava isn't installed or failed to start"
-        color: Theme.dim
+        color: Theme.textDim
     }
 }

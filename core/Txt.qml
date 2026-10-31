@@ -1,7 +1,7 @@
 import QtQuick
 
 Text {
-    color: Theme.white
+    color: Theme.text
     font.family: Theme.sans
     font.pixelSize: 12
 }

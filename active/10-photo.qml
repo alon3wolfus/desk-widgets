@@ -56,7 +56,7 @@ Card {
         anchors.centerIn: parent
         spacing: 4
         visible: root.current < 0
-        Txt { anchors.horizontalCenter: parent.horizontalCenter; text: "Add photos to"; color: Theme.dim }
+        Txt { anchors.horizontalCenter: parent.horizontalCenter; text: "Add photos to"; color: Theme.textDim }
         Txt { anchors.horizontalCenter: parent.horizontalCenter; text: "~/Pictures/desk-widgets"; font.family: Theme.mono; font.pixelSize: 11 }
     }
 

@@ -48,8 +48,8 @@ Card {
         Row {
             width: parent.width
             spacing: 8
-            Txt { text: "To do"; color: Theme.pink; font.pixelSize: 13; font.weight: Font.Medium }
-            Txt { text: root.remaining + " left"; color: Theme.dim }
+            Txt { text: "To do"; color: Theme.accent2; font.pixelSize: 13; font.weight: Font.Medium }
+            Txt { text: root.remaining + " left"; color: Theme.textDim }
         }
 
         Repeater {
@@ -74,16 +74,16 @@ Card {
                     id: box
                     width: 16; height: 16; radius: 8
                     anchors.verticalCenter: parent.verticalCenter
-                    color: row.modelData.done ? Theme.purple : "transparent"
+                    color: row.modelData.done ? Theme.accent : "transparent"
                     border.width: 1.5
-                    border.color: Theme.purple
+                    border.color: Theme.accent
                 }
 
                 Txt {
                     anchors { left: box.right; leftMargin: 10; right: del.left; rightMargin: 6; verticalCenter: parent.verticalCenter }
                     text: row.modelData.text
                     elide: Text.ElideRight
-                    color: row.modelData.done ? Theme.dim : Theme.white
+                    color: row.modelData.done ? Theme.textDim : Theme.text
                     font.strikeout: row.modelData.done
                 }
 
@@ -92,7 +92,7 @@ Card {
                     anchors { right: parent.right; verticalCenter: parent.verticalCenter }
                     text: "×"
                     font.pixelSize: 16
-                    color: delMouse.containsMouse ? Theme.red : Theme.dim
+                    color: delMouse.containsMouse ? Theme.red : Theme.textDim
                     visible: hover.containsMouse || delMouse.containsMouse
                     MouseArea {
                         id: delMouse
@@ -109,7 +109,7 @@ Card {
         Txt {
             visible: root.items.length > root.maxShown
             text: "+" + (root.items.length - root.maxShown) + " more"
-            color: Theme.dim
+            color: Theme.textDim
             font.pixelSize: 11
         }
 
@@ -121,7 +121,7 @@ Card {
                 id: input
                 anchors { fill: parent; leftMargin: 12; rightMargin: 12 }
                 verticalAlignment: TextInput.AlignVCenter
-                color: Theme.white
+                color: Theme.text
                 font.family: Theme.sans
                 font.pixelSize: 12
                 clip: true
@@ -131,7 +131,7 @@ Card {
                 anchors { left: parent.left; leftMargin: 12; verticalCenter: parent.verticalCenter }
                 visible: input.text === ""
                 text: "Add a task, press enter"
-                color: Theme.dim
+                color: Theme.textDim
             }
         }
     }

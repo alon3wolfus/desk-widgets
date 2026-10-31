@@ -48,8 +48,8 @@ Card {
         spacing: 10
 
         Bar { width: parent.width; label: "CPU";  value: root.cpu;  text: root.pct(root.cpu) }
-        Bar { width: parent.width; label: "RAM";  value: root.ram;  text: root.pct(root.ram);  tint: Theme.pink }
+        Bar { width: parent.width; label: "RAM";  value: root.ram;  text: root.pct(root.ram);  tint: Theme.accent2 }
         Bar { width: parent.width; label: "Disk"; value: root.disk; text: root.pct(root.disk) }
-        Bar { width: parent.width; label: "Temp"; value: root.temp / 100; text: Math.round(root.temp) + "°C"; tint: Theme.pink; visible: root.temp > 0 }
+        Bar { width: parent.width; label: "Temp"; value: root.temp / 100; text: Math.round(root.temp) + "°C"; tint: Theme.accent2; visible: root.temp > 0 }
     }
 }

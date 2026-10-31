@@ -101,14 +101,14 @@ Card {
 
                 ctx.lineCap = "round";
                 ctx.lineWidth = 2;
-                ctx.strokeStyle = Qt.alpha(Theme.dim, 0.3);
+                ctx.strokeStyle = Qt.alpha(Theme.textDim, 0.3);
                 trace(0, 24);
                 ctx.lineWidth = 3;
-                ctx.strokeStyle = Qt.alpha(Theme.pink, 0.55);
+                ctx.strokeStyle = Qt.alpha(Theme.accent2, 0.55);
                 trace(root.sunrise, root.sunset);
 
                 const p = at(root.hour), sx = p[0], sy = p[1];
-                const glow = root.isDay ? Theme.pink : Theme.purple;
+                const glow = root.isDay ? Theme.accent2 : Theme.accent;
                 const g = ctx.createRadialGradient(sx, sy, 0, sx, sy, 24);
                 g.addColorStop(0, Qt.alpha(glow, 0.55));
                 g.addColorStop(1, Qt.alpha(glow, 0));
@@ -118,7 +118,7 @@ Card {
                 ctx.fill();
 
                 if (root.isDay) {
-                    ctx.strokeStyle = Theme.pink;
+                    ctx.strokeStyle = Theme.accent2;
                     ctx.lineWidth = 1.8;
                     for (let i = 0; i < 8; i++) {
                         const a = i * Math.PI / 4;
@@ -127,14 +127,14 @@ Card {
                         ctx.lineTo(sx + Math.cos(a) * 14, sy + Math.sin(a) * 14);
                         ctx.stroke();
                     }
-                    ctx.fillStyle = Theme.white;
+                    ctx.fillStyle = Theme.text;
                     ctx.beginPath();
                     ctx.arc(sx, sy, 7, 0, Math.PI * 2);
                     ctx.fill();
                 } else {
                     // crescent opening to the right
                     const R = 9, t = Math.PI * 50 / 180;
-                    ctx.fillStyle = Theme.white;
+                    ctx.fillStyle = Theme.text;
                     ctx.beginPath();
                     ctx.arc(sx, sy, R, -t, t, true);
                     ctx.quadraticCurveTo(sx - R * 1.44, sy, sx + R * Math.cos(t), sy - R * Math.sin(t));
@@ -151,8 +151,8 @@ Card {
         }
 
         Txt { x: 10; y: 4; text: root.temp; font.pixelSize: 30; font.weight: Font.Medium }
-        Txt { anchors.right: parent.right; anchors.rightMargin: 10; y: 10; text: root.desc; color: Theme.pink; font.pixelSize: 13 }
-        Txt { anchors.horizontalCenter: parent.horizontalCenter; anchors.bottom: parent.bottom; text: root.place; color: Theme.dim; font.pixelSize: 11 }
+        Txt { anchors.right: parent.right; anchors.rightMargin: 10; y: 10; text: root.desc; color: Theme.accent2; font.pixelSize: 13 }
+        Txt { anchors.horizontalCenter: parent.horizontalCenter; anchors.bottom: parent.bottom; text: root.place; color: Theme.textDim; font.pixelSize: 11 }
     }
 
     Row {
@@ -173,7 +173,7 @@ Card {
                 Column {
                     anchors.centerIn: parent
                     spacing: 3
-                    Txt { anchors.horizontalCenter: parent.horizontalCenter; text: index === 0 ? "Today" : modelData.day; color: index === 0 ? Theme.purple : Theme.dim; font.pixelSize: 11 }
+                    Txt { anchors.horizontalCenter: parent.horizontalCenter; text: index === 0 ? "Today" : modelData.day; color: index === 0 ? Theme.accent : Theme.textDim; font.pixelSize: 11 }
                     Txt { anchors.horizontalCenter: parent.horizontalCenter; text: root.icon(modelData.code); font.pixelSize: 16 }
                     Txt { anchors.horizontalCenter: parent.horizontalCenter; text: modelData.max + "° / " + modelData.min + "°"; font.pixelSize: 11 }
                 }

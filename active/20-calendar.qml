@@ -105,7 +105,7 @@ Card {
 
         Txt {
             text: Qt.formatDate(root.now, "MMMM yyyy")
-            color: Theme.pink
+            color: Theme.accent2
             font.pixelSize: 13
             font.weight: Font.Medium
         }
@@ -135,21 +135,21 @@ Card {
                         Txt {
                             anchors.horizontalCenter: parent.horizontalCenter
                             text: Qt.formatDate(cell.modelData, "ddd").substring(0, 2)
-                            color: Theme.dim
+                            color: Theme.textDim
                             font.pixelSize: 11
                         }
 
                         Rectangle {
                             anchors.horizontalCenter: parent.horizontalCenter
                             width: 28; height: 28; radius: 14
-                            color: cell.today ? Theme.purple : "transparent"
+                            color: cell.today ? Theme.accent : "transparent"
                             border.width: cell.shown && !cell.today ? 1.5 : 0
-                            border.color: Theme.pink
+                            border.color: Theme.accent2
 
                             Txt {
                                 anchors.centerIn: parent
                                 text: cell.modelData.getDate()
-                                color: cell.today ? Theme.onAccent : Theme.white
+                                color: cell.today ? Theme.onAccent : Theme.text
                                 font.pixelSize: 13
                                 font.weight: cell.today ? Font.Medium : Font.Normal
                             }
@@ -158,7 +158,7 @@ Card {
                         Rectangle {
                             anchors.horizontalCenter: parent.horizontalCenter
                             width: 4; height: 4; radius: 2
-                            color: cell.hasEvents ? Theme.pink : "transparent"
+                            color: cell.hasEvents ? Theme.accent2 : "transparent"
                         }
                     }
 
@@ -171,7 +171,7 @@ Card {
             }
         }
 
-        Rectangle { width: parent.width; height: 1; color: Theme.cardEdge }
+        Rectangle { width: parent.width; height: 1; color: Theme.edge }
 
         Column {
             id: agenda
@@ -181,7 +181,7 @@ Card {
             Txt {
                 visible: root.headline !== ""
                 text: root.headline
-                color: Theme.pink
+                color: Theme.accent2
                 font.weight: Font.Medium
             }
 
@@ -193,7 +193,7 @@ Card {
                     width: agenda.width
                     spacing: 10
 
-                    Txt { width: 52; text: modelData.allDay ? "All day" : modelData.start; color: Theme.purple }
+                    Txt { width: 52; text: modelData.allDay ? "All day" : modelData.start; color: Theme.accent }
                     Txt { width: agenda.width - 62; text: modelData.title; elide: Text.ElideRight }
                 }
             }
@@ -201,7 +201,7 @@ Card {
             Txt {
                 visible: root.agendaView.events.length > 4
                 text: "+" + (root.agendaView.events.length - 4) + " more"
-                color: Theme.dim
+                color: Theme.textDim
                 font.pixelSize: 11
             }
 
@@ -209,7 +209,7 @@ Card {
                 visible: root.notice !== ""
                 width: agenda.width
                 text: root.notice
-                color: Theme.dim
+                color: Theme.textDim
                 wrapMode: Text.WordWrap
                 font.pixelSize: 11
             }
