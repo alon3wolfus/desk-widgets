@@ -31,13 +31,13 @@ Item {
     readonly property int areaY: margin + insetTop
     readonly property int areaW: width - areaX - margin - insetRight
     readonly property int areaH: height - areaY - margin - insetBottom
-    readonly property int cols: Math.max(1, Math.floor((areaW + Theme.gap) / cell))
-    readonly property int rows: Math.max(1, Math.floor((areaH + Theme.gap) / cell))
     // like macOS, the left half of the columns lines up from the left edge and the right half
     // from the right edge (rows: top and bottom), so widgets hug the screen edges and the
-    // space that doesn't fit a whole cell ends up in the middle
-    readonly property int splitCol: Math.ceil(cols / 2)
-    readonly property int splitRow: Math.ceil(rows / 2)
+    // space that doesn't fit a whole cell ends up in the middle. Columns come in an even
+    // number so both sides match; an odd number of rows gets a middle row of its own.
+    readonly property int fitCols: Math.max(1, Math.floor((areaW + Theme.gap) / cell))
+    readonly property int cols: fitCols > 1 ? fitCols - fitCols % 2 : 1
+    readonly property int rows: Math.max(1, Math.floor((areaH + Theme.gap) / cell))
 
     // ---- which files are active ----
 
@@ -113,8 +113,19 @@ Item {
         return out;
     }
     function spanOf(s) { return Pack.span(s.item.width, s.item.height, Theme.unit, Theme.gap); }
-    function cellX(col) { return col < splitCol ? areaX + col * cell : areaX + areaW - (cols - col) * cell + Theme.gap; }
-    function cellY(row) { return row < splitRow ? areaY + row * cell : areaY + areaH - (rows - row) * cell + Theme.gap; }
+    function along(i, n, start, len) {
+        const half = Math.floor(n / 2);
+        if (n % 2 === 1 && i === half) return start + (len - Theme.unit) / 2;
+        return i < half ? start + i * cell : start + len - (n - i) * cell + Theme.gap;
+    }
+    function cellX(col) { return along(col, cols, areaX, areaW); }
+    function cellY(row) { return along(row, rows, areaY, areaH); }
+    // a widget lying across the middle line is centred on it, so a 2-wide clock sits dead centre
+    function placeAlong(i, span, size, n, start, len) {
+        return i < n / 2 && i + span > n / 2 ? start + (len - size) / 2 : along(i, n, start, len);
+    }
+    function posX(col, s) { return placeAlong(col, spanOf(s).w, s.width, cols, areaX, areaW); }
+    function posY(row, s) { return placeAlong(row, spanOf(s).h, s.height, rows, areaY, areaH); }
     function nearest(v, n, at) {
         let best = 0;
         for (let i = 1; i < n; i++) if (Math.abs(at(i) - v) < Math.abs(at(best) - v)) best = i;
@@ -157,7 +168,7 @@ Item {
             if (Object.keys(fresh).length) { Layout.place(fresh); return; }    // lays out again once saved
             for (const s of all) {
                 const p = Layout.positions[s.name];
-                target.set(s, { x: cellX(p.col), y: cellY(p.row) });
+                target.set(s, { x: posX(p.col, s), y: posY(p.row, s) });
             }
         }
 
@@ -179,7 +190,7 @@ Item {
                 if (o !== s && p) taken.push({ col: p.col, row: p.row, w: spanOf(o).w, h: spanOf(o).h });
             }
             const p = Pack.nearestFree(colAt(s.x), rowAt(s.y), sp, taken, cols, rows);
-            return { col: p.col, row: p.row, x: cellX(p.col), y: cellY(p.row), w: s.width, h: s.height };
+            return { col: p.col, row: p.row, x: posX(p.col, s), y: posY(p.row, s), w: s.width, h: s.height };
         }
         const cx = s.x + s.width / 2, cy = s.y + s.height / 2;
         const zc = Math.max(0, Math.min(2, Math.floor(cx / (width / 3))));

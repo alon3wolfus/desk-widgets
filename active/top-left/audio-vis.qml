@@ -5,7 +5,7 @@ import qs.core
 
 // what's playing, in the style of the macOS Music widget: cover, title and artist over a
 // blurred copy of the cover, with a waveform from cava (https://github.com/karlstav/cava)
-// that moves with the sound. Click the card to play / pause.
+// that moves with the sound, and previous / play-pause / next buttons.
 Card {
     id: root
 
@@ -65,7 +65,7 @@ Card {
     }
 
     Column {
-        anchors { left: cover.right; leftMargin: 14; right: parent.right; verticalCenter: cover.verticalCenter }
+        anchors { left: cover.right; leftMargin: 14; right: controls.left; rightMargin: 6; verticalCenter: cover.verticalCenter }
         spacing: 1
 
         Row {
@@ -131,10 +131,24 @@ Card {
         font.pixelSize: 11
     }
 
-    MouseArea {
-        anchors.fill: parent
-        anchors.margins: -root.pad
-        cursorShape: root.player ? Qt.PointingHandCursor : Qt.ArrowCursor
-        onClicked: if (root.player && root.player.canTogglePlaying) root.player.togglePlaying()
+    Row {
+        id: controls
+        anchors { right: parent.right; rightMargin: -6; verticalCenter: cover.verticalCenter }
+        spacing: 0
+        visible: root.player !== null
+        IconButton {
+            icon: "skip_previous"; size: 32; fill: "transparent"; ink: root.ink
+            opacity: root.player && root.player.canGoPrevious ? 1 : 0.4
+            onClicked: if (root.player && root.player.canGoPrevious) root.player.previous()
+        }
+        IconButton {
+            icon: root.playing ? "pause" : "play_arrow"; size: 36; fill: "transparent"; ink: root.ink
+            onClicked: if (root.player && root.player.canTogglePlaying) root.player.togglePlaying()
+        }
+        IconButton {
+            icon: "skip_next"; size: 32; fill: "transparent"; ink: root.ink
+            opacity: root.player && root.player.canGoNext ? 1 : 0.4
+            onClicked: if (root.player && root.player.canGoNext) root.player.next()
+        }
     }
 }
